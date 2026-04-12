@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LevelUpSecurityLabs</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a30;
+      --panel-2:#0f1730;
+      --text:#e8eefc;
+      --muted:#9fb0d8;
+      --accent:#5eead4;
+      --accent-2:#60a5fa;
+      --border:rgba(255,255,255,0.08);
+      --shadow:0 20px 45px rgba(0,0,0,0.35);
+      --radius:18px;
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(94,234,212,0.16), transparent 22%),
+        linear-gradient(180deg, #09101f 0%, #0b1020 100%);
+      line-height:1.6;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%}
+
+    .container{
+      width:min(calc(100% - 2rem), var(--max));
+      margin:0 auto;
+    }
+
+    .nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(12px);
+      background:rgba(11,16,32,0.72);
+      border-bottom:1px solid var(--border);
+    }
+
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 0;
+      gap:1rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, var(--accent-2), var(--accent));
+      color:#08101c;
+      font-weight:900;
+      box-shadow:var(--shadow);
+    }
+
+    .nav-links{
+      display:flex;
+      gap:1.1rem;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:.96rem;
+    }
+
+    .nav-links a:hover{color:var(--text)}
+
+    .hero{
+      padding:5.5rem 0 3.5rem;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:2rem;
+      align-items:center;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      color:var(--accent);
+      background:rgba(94,234,212,0.08);
+      border:1px solid rgba(94,234,212,0.18);
+      padding:.45rem .75rem;
+      border-radius:999px;
+      font-size:.88rem;
+      margin-bottom:1rem;
+    }
+
+    h1{
+      font-size:clamp(2.3rem, 4vw, 4.6rem);
+      line-height:1.05;
+      margin:.2rem 0 1rem;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      color:var(--muted);
+      font-size:1.08rem;
+      max-width:62ch;
+      margin:0 0 1.6rem;
+    }
+
+    .cta-row{
+      display:flex;
+      gap:.9rem;
+      flex-wrap:wrap;
+      margin-bottom:1.4rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.92rem 1.15rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent-2), var(--accent));
+      color:#08101c;
+      border:none;
+      box-shadow:var(--shadow);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.02);
+      color:var(--text);
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+
+    .hero-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.1rem;
+      box-shadow:var(--shadow);
+    }
+
+    .terminal{
+      background:#07101b;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.07);
+    }
+
+    .terminal-top{
+      display:flex;
+      gap:.4rem;
+      padding:.8rem 1rem;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      background:#091522;
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:999px;background:#29425f;
+    }
+
+    .terminal-body{
+      padding:1rem 1rem 1.15rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:.94rem;
+      color:#c8ddff;
+    }
+
+    .terminal-line{margin:.45rem 0}
+    .prompt{color:var(--accent)}
+    .good{color:#9ef0bc}
+    .note{color:#7fb8ff}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1rem;
+      margin-top:1.2rem;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.025);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:1rem;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:1.3rem;
+      margin-bottom:.15rem;
+    }
+
+    section{
+      padding:1rem 0 4rem;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1.2rem;
+    }
+
+    .section-head h2{
+      font-size:1.7rem;
+      margin:0;
+      letter-spacing:-.02em;
+    }
+
+    .section-head p{
+      margin:0;
+      color:var(--muted);
+      max-width:60ch;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1rem;
+    }
+
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.2rem;
+      box-shadow:var(--shadow);
+    }
+
+    .card h3{
+      margin:.2rem 0 .45rem;
+      font-size:1.12rem;
+    }
+
+    .card p{
+      margin:0 0 .85rem;
+      color:var(--muted);
+      font-size:.97rem;
+    }
+
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      padding:.3rem .6rem;
+      border-radius:999px;
+      border:1px solid rgba(96,165,250,0.25);
+      color:#b8d6ff;
+      background:rgba(96,165,250,0.07);
+      margin-bottom:.7rem;
+    }
+
+    .link{
+      color:var(--accent);
+      font-weight:700;
+      font-size:.95rem;
+    }
+
+    .featured{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:1rem;
+    }
+
+    .feature-main{
+      min-height:280px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .feature-main::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(96,165,250,.2), transparent 45%),
+        linear-gradient(180deg, rgba(94,234,212,.08), transparent 55%);
+      pointer-events:none;
+    }
+
+    .feature-list{
+      display:grid;
+      gap:1rem;
+    }
+
+    .newsletter{
+      text-align:center;
+      padding:2rem;
+      background:
+        radial-gradient(circle at top, rgba(94,234,212,.12), transparent 35%),
+        linear-gradient(180deg, #101933, #0d152b);
+    }
+
+    .newsletter p{
+      color:var(--muted);
+      max-width:58ch;
+      margin:.5rem auto 1.2rem;
+    }
+
+    .signup{
+      display:flex;
+      gap:.8rem;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    input[type="email"]{
+      width:min(420px, 100%);
+      padding:.95rem 1rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#091321;
+      color:var(--text);
+      outline:none;
+    }
+
+    footer{
+      padding:1.5rem 0 3rem;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .footer-inner{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      flex-wrap:wrap;
+      border-top:1px solid var(--border);
+      padding-top:1.2rem;
+    }
+
+    @media (max-width: 900px){
+      .hero-grid,
+      .featured,
+      .grid-3{
+        grid-template-columns:1fr;
+      }
+      .stats{grid-template-columns:1fr}
+      .section-head{align-items:start; flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#">
+        <span class="brand-mark">L</span>
+        <span>LevelUpSecurityLabs</span>
+      </a>
+      <div class="nav-links">
+        <a href="#labs">Labs</a>
+        <a href="#posts">Posts</a>
+        <a href="#featured">Featured</a>
+        <a href="#about">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">Hands-on cybersecurity labs • Azure • Detection • DFIR</div>
+        <h1>Build real security skills, one lab at a time.</h1>
+        <p>
+          LevelUpSecurityLabs is a practical cybersecurity blog focused on step-by-step labs,
+          cloud security walkthroughs, detection engineering, and blue team learning you can
+          actually use on the job.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#posts">Read the latest post</a>
+          <a class="btn btn-secondary" href="#labs">Explore labs</a>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <strong>Cloud Labs</strong>
+            <span>Azure, Microsoft security, identity, and data protection walkthroughs.</span>
+          </div>
+          <div class="stat">
+            <strong>Detection Focus</strong>
+            <span>KQL, threat hunting, email compromise, and endpoint investigation content.</span>
+          </div>
+          <div class="stat">
+            <strong>Career Growth</strong>
+            <span>Designed for engineers building hands-on experience beyond certifications.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="terminal">
+          <div class="terminal-top">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line"><span class="prompt">$</span> initialize-lab --platform azure</div>
+            <div class="terminal-line"><span class="note">[info]</span> Creating tenant-safe learning environment...</div>
+            <div class="terminal-line"><span class="note">[info]</span> Enabling logging, identity, storage, and policy controls...</div>
+            <div class="terminal-line"><span class="good">[ok]</span> Lab ready: Purview + Defender + Entra test workflow</div>
+            <div class="terminal-line"><span class="prompt">$</span> publish writeup --site levelupsecuritylabs</div>
+            <div class="terminal-line"><span class="good">[ok]</span> New post deployed successfully.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="featured">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Featured content</h2>
+            <p>Showcase your strongest post, a hands-on lab, and a quick resource section right on the homepage.</p>
+          </div>
+        </div>
+
+        <div class="featured">
+          <article class="card feature-main">
+            <span class="tag">Featured Post</span>
+            <h3>How to Build a Microsoft Purview Lab Without an Enterprise Budget</h3>
+            <p>
+              A practical guide to creating a low-cost learning environment for sensitivity labels,
+              classification, encryption, and safe testing workflows.
+            </p>
+            <a class="link" href="#">Read featured article →</a>
+          </article>
+
+          <div class="feature-list">
+            <article class="card">
+              <span class="tag">Quick Lab</span>
+              <h3>Detecting suspicious inbox rules with KQL</h3>
+              <p>Walk through a focused email compromise detection lab using Microsoft data sources and hunting logic.</p>
+              <a class="link" href="#">Open lab →</a>
+            </article>
+            <article class="card">
+              <span class="tag">Starter Guide</span>
+              <h3>What account should you use for Azure security labs?</h3>
+              <p>A beginner-friendly breakdown of subscriptions, free tiers, and how to avoid unnecessary costs.</p>
+              <a class="link" href="#">View guide →</a>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="labs">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Lab categories</h2>
+            <p>Organize the site around the topics you want to be known for.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag">Azure</span>
+            <h3>Cloud Security Labs</h3>
+            <p>Build environments that teach identity, logging, storage, security controls, and architecture fundamentals.</p>
+            <a class="link" href="#">Browse category →</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">Blue Team</span>
+            <h3>Detection & Threat Hunting</h3>
+            <p>Step-by-step exercises on investigations, attack patterns, hunting techniques, and useful KQL workflows.</p>
+            <a class="link" href="#">Browse category →</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">Career</span>
+            <h3>Certification to Real-World Skills</h3>
+            <p>Bridge the gap between passing exams and building practical experience that improves performance at work.</p>
+            <a class="link" href="#">Browse category →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="posts">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Recent posts</h2>
+            <p>Use this section to rotate in your latest walkthroughs and keep the homepage active.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag">Microsoft Security</span>
+            <h3>Getting started with sensitivity labels in a test tenant</h3>
+            <p>Start small, label safely, and understand what changes when encryption enters the picture.</p>
+            <a class="link" href="#">Read post →</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">DFIR</span>
+            <h3>Using KAPE for targeted forensic collection in a lab</h3>
+            <p>Learn where KAPE fits, what artifacts to grab first, and how to keep collections focused and useful.</p>
+            <a class="link" href="#">Read post →</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">Detection Engineering</span>
+            <h3>MailItemsAccessed and inbox rule abuse: a practical starting point</h3>
+            <p>Build a simple but strong detection workflow for common mailbox compromise activity.</p>
+            <a class="link" href="#">Read post →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>About the site</h2>
+            <p>This homepage is designed to position your blog as practical, technical, and credible without feeling overly corporate.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <h3>Clear niche</h3>
+            <p>It immediately tells visitors the site is about hands-on cybersecurity labs, not generic tech commentary.</p>
+          </article>
+          <article class="card">
+            <h3>Strong homepage flow</h3>
+            <p>Hero section, featured post, lab categories, and recent posts make it easy for readers to find value fast.</p>
+          </article>
+          <article class="card">
+            <h3>Easy to expand</h3>
+            <p>You can plug this into GitHub Pages now and later convert it into Jekyll, Hugo, or another static blog platform.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="card newsletter">
+          <h2>Follow the build</h2>
+          <p>
+            Add an email signup, a simple updates form, or links to LinkedIn and GitHub here once the site is live.
+          </p>
+          <div class="signup">
+            <input type="email" placeholder="Your email address" />
+            <a class="btn btn-primary" href="#">Subscribe</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© 2026 LevelUpSecurityLabs</div>
+      <div>Built for hands-on learners in cloud security, detection, and DFIR.</div>
+    </div>
+  </footer>
+</body>
+</html>
