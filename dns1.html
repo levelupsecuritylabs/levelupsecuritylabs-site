@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNS Lessons: GitHub Pages, A Records, and CNAME Records | LevelUpSecurityLabs</title>
+  <meta name="description" content="How I connected a free GitHub Pages site to a custom domain and what I learned about A records and CNAME records." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --panel-2: #182242;
+      --text: #e8ecf8;
+      --muted: #b8c2e0;
+      --accent: #6ea8fe;
+      --accent-2: #8ef0c9;
+      --border: #2a3766;
+      --code: #0a0f1f;
+      --max: 900px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.65;
+      background: linear-gradient(180deg, var(--bg), #0e1530 35%, #0b1020 100%);
+      color: var(--text);
+    }
+
+    header {
+      padding: 56px 20px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 12, 26, 0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(110, 168, 254, 0.1);
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      margin-top: 42px;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin-top: 28px;
+      margin-bottom: 10px;
+      color: var(--accent-2);
+    }
+
+    p, li {
+      color: var(--muted);
+      font-size: 1.03rem;
+    }
+
+    main {
+      padding: 36px 0 60px;
+    }
+
+    .lead {
+      font-size: 1.08rem;
+      max-width: 760px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      margin: 24px 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 18px;
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    code {
+      font-family: Consolas, Monaco, monospace;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #ffffff;
+    }
+
+    pre {
+      background: var(--code);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      overflow-x: auto;
+      color: #d9e2ff;
+      font-size: 0.95rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    ul {
+      padding-left: 22px;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      padding: 10px 14px;
+      background: rgba(110, 168, 254, 0.08);
+      border-radius: 8px;
+      margin: 18px 0;
+    }
+
+    .footer {
+      padding: 28px 20px 60px;
+      border-top: 1px solid var(--border);
+      color: #95a3cb;
+      font-size: 0.95rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 700px) {
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.45rem; }
+      .container { padding: 0 16px; }
+      header { padding-top: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="eyebrow">LevelUpSecurityLabs • Blog Post</div>
+      <h1>From Free GitHub Pages to a Custom Domain:<br>What I Learned About A Records and CNAME Records</h1>
+      <p class="lead">
+        Publishing a blog sounds simple until DNS enters the picture. This post walks through how I connected a free GitHub Pages site to my custom domain and the real lessons I learned about A records, CNAME records, propagation, and security.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section>
+        <h2>Introduction</h2>
+        <p>
+          When I launched <strong>LevelUpSecurityLabs</strong>, I wanted a clean and low-cost way to host a cybersecurity blog. GitHub Pages was the perfect starting point because it let me publish a website for free directly from a repository.
+        </p>
+        <p>
+          The part that turned into the biggest learning experience was connecting that free site to a real custom domain. That is where DNS stopped being an abstract concept and became something practical I had to understand well enough to make the site work.
+        </p>
+      </section>
+
+      <section>
+        <h2>What I Did</h2>
+        <div class="card">
+          <h3>Step 1: Created a free GitHub Pages site</h3>
+          <p>
+            I created a GitHub repository for my site and added an <code>index.html</code> file so GitHub Pages could publish it as a website.
+          </p>
+          <pre><code>Repository example:
+username.github.io</code></pre>
+
+          <h3>Step 2: Bought and prepared my domain</h3>
+          <p>
+            I used my domain provider to manage DNS records for <code>levelupsecuritylabs.com</code>.
+          </p>
+
+          <h3>Step 3: Pointed the domain to GitHub Pages</h3>
+          <p>
+            To make the root domain work, I added GitHub Pages IP addresses as <strong>A records</strong>. To make the <code>www</code> version work, I created a <strong>CNAME record</strong> pointing to my GitHub Pages hostname.
+          </p>
+
+          <h3>Step 4: Added the custom domain in GitHub</h3>
+          <p>
+            In GitHub Pages settings, I added my custom domain so GitHub knew which domain should map to the site.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>How the DNS Records Were Set Up</h2>
+        <div class="grid">
+          <div class="mini-card">
+            <h3>A Records for the Root Domain</h3>
+            <pre><code>Type: A
+Host: @
+Value: 185.199.108.153
+Value: 185.199.109.153
+Value: 185.199.110.153
+Value: 185.199.111.153</code></pre>
+            <p>
+              These records made <code>levelupsecuritylabs.com</code> resolve to GitHub Pages.
+            </p>
+          </div>
+          <div class="mini-card">
+            <h3>CNAME Record for WWW</h3>
+            <pre><code>Type: CNAME
+Host: www
+Value: username.github.io</code></pre>
+            <p>
+              This made <code>www.levelupsecuritylabs.com</code> resolve to the GitHub Pages hostname.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>What I Learned About A Records</h2>
+        <p>
+          An <strong>A record</strong> maps a domain directly to an IP address. This is what lets a domain name point straight to the system hosting your website.
+        </p>
+        <pre><code>levelupsecuritylabs.com → 185.199.108.153</code></pre>
+        <div class="note">
+          <p><strong>Lesson:</strong> A records are usually what you use for the root domain, also called the apex domain.</p>
+        </div>
+        <ul>
+          <li>They point directly to an IP address.</li>
+          <li>They are commonly used for the root domain like <code>levelupsecuritylabs.com</code>.</li>
+          <li>If the hosting provider changes IP addresses, the DNS record must be updated.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>What I Learned About CNAME Records</h2>
+        <p>
+          A <strong>CNAME record</strong> maps one domain name to another domain name instead of directly to an IP address.
+        </p>
+        <pre><code>www.levelupsecuritylabs.com → username.github.io</code></pre>
+        <div class="note">
+          <p><strong>Lesson:</strong> CNAME records are great for subdomains because they follow the destination hostname automatically.</p>
+        </div>
+        <ul>
+          <li>They point to another hostname rather than an IP address.</li>
+          <li>They are commonly used for subdomains like <code>www</code>.</li>
+          <li>They are more flexible because the target service can change IPs without requiring you to update DNS manually.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>A Record vs CNAME Record</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>A Record</th>
+              <th>CNAME Record</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Points to</td>
+              <td>IP address</td>
+              <td>Another domain name</td>
+            </tr>
+            <tr>
+              <td>Best use</td>
+              <td>Root domain</td>
+              <td>Subdomains like <code>www</code></td>
+            </tr>
+            <tr>
+              <td>Flexibility</td>
+              <td>Lower</td>
+              <td>Higher</td>
+            </tr>
+            <tr>
+              <td>Maintenance</td>
+              <td>Manual if IP changes</td>
+              <td>Usually easier to maintain</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Problems I Ran Into</h2>
+        <div class="card">
+          <h3>DNS propagation delay</h3>
+          <p>
+            After making the changes, the site did not work immediately. That was not because the configuration was wrong. It was because DNS changes take time to propagate.
+          </p>
+
+          <h3>HTTPS did not work right away</h3>
+          <p>
+            The secure version of the site was not ready until the domain was resolving correctly and GitHub finished provisioning the certificate.
+          </p>
+
+          <h3>Root domain and <code>www</code> are not the same thing</h3>
+          <p>
+            I learned that supporting both versions takes separate DNS planning. One was handled with A records, and the other with a CNAME record.
+          </p>
+
+          <h3>New sites can look suspicious</h3>
+          <p>
+            A brand new domain or website can sometimes get flagged by security tools because it has little or no reputation yet.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Security Lessons From a Simple Blog Setup</h2>
+        <p>
+          This process also reinforced how important DNS is from a security perspective. DNS is not just a website setup task. It is part of the trust model for the internet.
+        </p>
+        <ul>
+          <li>Misconfigured DNS can cause outages and broken user access.</li>
+          <li>Dangling CNAME records can create subdomain takeover risk.</li>
+          <li>Attackers often abuse weak or abandoned DNS configurations.</li>
+        </ul>
+        <pre><code>oldsubdomain.levelupsecuritylabs.com → old-service.example.com</code></pre>
+        <p>
+          If that destination is no longer in use but the DNS record remains, someone else may be able to claim the service and take control of the subdomain.
+        </p>
+      </section>
+
+      <section>
+        <h2>Final Takeaways</h2>
+        <ul>
+          <li>GitHub Pages is a great free option for hosting a personal blog.</li>
+          <li>A records are used to point the root domain directly to IP addresses.</li>
+          <li>CNAME records are used to point a subdomain to another hostname.</li>
+          <li>You often need both to fully support a custom domain setup.</li>
+          <li>DNS is not just infrastructure. It is also a real security concern.</li>
+        </ul>
+      </section>
+
+      <section>
+  <h2>Next Up</h2>
+  <p>
+    In the next post, I’ll break down a real issue I ran into after publishing this site:
+  </p>
+
+  <h3>🛡️ Why Is Anti-Virus Blocking My Webpage?</h3>
+
+  <p>
+    After launching my blog, I noticed that some browsers and security tools were flagging the site as suspicious. This wasn’t due to malicious activity, but rather how new domains and infrastructure are treated in security ecosystems.
+  </p>
+
+  <p>
+    I’ll cover:
+  </p>
+
+  <ul>
+    <li>Why newly registered domains get flagged</li>
+    <li>How reputation-based security systems work</li>
+    <li>Common false positives with GitHub Pages hosting</li>
+    <li>Steps to improve domain reputation and reduce blocking</li>
+  </ul>
+
+  <p>
+    This is a real-world example of how security controls can impact legitimate projects—and what you can do about it.
+  </p>
+</section>
+    </div>
+  </main>
+
+  <div class="footer">
+    <div class="container">
+      Built for LevelUpSecurityLabs.
+    </div>
+  </div>
+</body>
+</html>
