@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Security Labs | LevelUpSecurityLabs</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#0a1730;
+      --panel-2:#0d1c3c;
+      --border:#18325f;
+      --text:#f5f7fb;
+      --muted:#b7c4df;
+      --accent:#67f3e6;
+      --accent-2:#7fb2ff;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --radius: 28px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(78,126,255,.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(54,246,220,.12), transparent 24%),
+        linear-gradient(180deg, #050c18 0%, #07111f 100%);
+      min-height:100vh;
+    }
+
+    .container{
+      width:min(1150px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(12px);
+      background:rgba(5,12,24,.72);
+      border-bottom:1px solid rgba(24,50,95,.65);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:16px 0;
+    }
+
+    .brand{
+      font-size:1.1rem;
+      font-weight:800;
+      letter-spacing:.02em;
+      text-decoration:none;
+      color:var(--text);
+    }
+
+    .brand span{color:var(--accent)}
+    nav a{
+      color:var(--muted);
+      text-decoration:none;
+      margin-left:18px;
+      font-weight:600;
+    }
+    nav a:hover{color:var(--text)}
+
+    .hero-wrap{
+      padding:56px 0 28px;
+    }
+
+    .hero-card{
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(90,132,255,.16), transparent 28%),
+        linear-gradient(135deg, #0b1734 0%, #08112a 100%);
+      border:1px solid var(--border);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:30px 28px 30px;
+    }
+
+    .hero-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      border-radius:32px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:12px 16px;
+      border:1px solid rgba(127,178,255,.35);
+      border-radius:999px;
+      color:var(--text);
+      background:rgba(18,35,74,.65);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+      font-weight:600;
+      margin-bottom:28px;
+    }
+
+    .hero-content{
+      max-width:720px;
+    }
+
+    .hero-title{
+      margin:0 0 18px;
+      font-size:clamp(2rem, 4vw, 3.25rem);
+      line-height:1.08;
+      letter-spacing:-0.03em;
+    }
+
+    .hero-copy{
+      margin:0 0 28px;
+      font-size:clamp(1.08rem, 1.9vw, 1.5rem);
+      line-height:1.65;
+      color:var(--muted);
+      max-width:780px;
+    }
+
+    .cta{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:14px 18px;
+      border-radius:12px;
+      color:var(--accent);
+      text-decoration:none;
+      font-size:1.45rem;
+      font-weight:800;
+      border:2px solid rgba(255,255,255,.9);
+      box-shadow:
+        0 0 0 2px rgba(12,25,56,.9) inset,
+        0 0 18px rgba(103,243,230,.15);
+      background:rgba(4,12,24,.55);
+    }
+
+    .cta:hover{
+      transform:translateY(-1px);
+      box-shadow:
+        0 0 0 2px rgba(12,25,56,.9) inset,
+        0 0 22px rgba(103,243,230,.22);
+    }
+
+    .section{
+      padding:26px 0 70px;
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      align-items:end;
+      margin-bottom:22px;
+    }
+
+    .section-head h2{
+      margin:0;
+      font-size:1.6rem;
+    }
+
+    .section-head p{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:700px;
+      line-height:1.65;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:18px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(13,28,60,.96), rgba(9,19,41,.98));
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .tag{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(103,243,230,.08);
+      border:1px solid rgba(103,243,230,.18);
+      color:var(--accent);
+      font-size:.85rem;
+      font-weight:700;
+      margin-bottom:16px;
+    }
+
+    .card h3{
+      margin:0 0 10px;
+      font-size:1.2rem;
+      line-height:1.35;
+    }
+
+    .card p{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .card a{
+      color:var(--accent-2);
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    .card a:hover{color:var(--accent)}
+
+    .feature-list{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:18px;
+      margin-top:20px;
+    }
+
+    .feature{
+      background:rgba(10,23,48,.74);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .feature strong{
+      display:block;
+      margin-bottom:8px;
+      font-size:1.02rem;
+    }
+
+    .feature span{
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    footer{
+      border-top:1px solid rgba(24,50,95,.65);
+      padding:22px 0 36px;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    @media (max-width: 900px){
+      .grid, .feature-list{grid-template-columns:1fr}
+      .hero-card{padding:26px 22px}
+      .cta{font-size:1.2rem}
+      .nav{flex-direction:column; align-items:flex-start}
+      nav a{margin:0 14px 0 0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">LevelUp<span>SecurityLabs</span></a>
+      <nav>
+        <a href="#">Home</a>
+        <a href="#">Categories</a>
+        <a href="#">Labs</a>
+        <a href="#">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-wrap">
+      <div class="container">
+        <div class="hero-card">
+          <div class="hero-content">
+            <div class="pill">Azure</div>
+            <h1 class="hero-title">Cloud Security Labs</h1>
+            <p class="hero-copy">
+              Build environments that teach identity, logging, storage, security controls,
+              and architecture fundamentals.
+            </p>
+            <a class="cta" href="#labs">Browse category →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="labs">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Featured cloud labs</h2>
+            <p>
+              Use this category page to organize hands-on Azure content by difficulty and topic.
+              These sample cards are ready for your first real labs.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <div class="tag">Beginner</div>
+            <h3>Choosing the Right Azure Account for Security Labs</h3>
+            <p>
+              A practical guide to subscriptions, free tiers, spending controls, and how to avoid
+              surprise charges when building your first lab.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+
+          <article class="card">
+            <div class="tag">Identity</div>
+            <h3>Build a Microsoft Entra ID Test Tenant</h3>
+            <p>
+              Create a safe identity lab to learn users, groups, MFA, conditional access,
+              break-glass accounts, and role separation.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+
+          <article class="card">
+            <div class="tag">Monitoring</div>
+            <h3>Azure Logging Fundamentals</h3>
+            <p>
+              Learn how activity logs, sign-in logs, and diagnostic settings work together so you
+              can build better investigations from day one.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+
+          <article class="card">
+            <div class="tag">Storage</div>
+            <h3>Secure Azure Storage the Right Way</h3>
+            <p>
+              Practice private endpoints, access control, key handling, and common mistakes that
+              expose blobs, files, or data lakes.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+
+          <article class="card">
+            <div class="tag">Architecture</div>
+            <h3>Design a Safe Security Lab Network</h3>
+            <p>
+              Build virtual networks, subnets, NSGs, and segmentation patterns that keep testing
+              isolated from production and personal workloads.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+
+          <article class="card">
+            <div class="tag">Defender</div>
+            <h3>First Steps with Microsoft Defender for Cloud</h3>
+            <p>
+              Turn on core protections, review recommendations, and understand what the platform
+              can actually teach you in a real learning environment.
+            </p>
+            <a href="#">Read lab →</a>
+          </article>
+        </div>
+
+        <div class="section-head" style="margin-top:34px;">
+          <div>
+            <h2>What this category covers</h2>
+            <p>
+              This section mirrors your blog style and can stay on every category page so readers
+              immediately understand what they will learn.
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-list">
+          <div class="feature">
+            <strong>Identity & access</strong>
+            <span>Tenants, roles, MFA, conditional access, least privilege, and access review concepts.</span>
+          </div>
+          <div class="feature">
+            <strong>Logging & visibility</strong>
+            <span>Sign-in telemetry, activity logs, diagnostics, retention decisions, and investigation basics.</span>
+          </div>
+          <div class="feature">
+            <strong>Cloud architecture</strong>
+            <span>Networking, storage, isolation, and secure-by-default design patterns for learning labs.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      LevelUpSecurityLabs — Build. Break. Defend. Repeat.
+    </div>
+  </footer>
+</body>
+</html>
