@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What Account Should You Use for Azure Security Labs? | LevelUpSecurityLabs</title>
+  <meta name="description" content="Beginner-friendly guide to choosing the right Azure account for security labs. Learn about subscriptions, free tiers, and how to avoid unexpected costs." />
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --panel-alt: #0f1730;
+      --text: #e8ecf8;
+      --muted: #a9b4d0;
+      --accent: #4da3ff;
+      --accent-2: #7af0c8;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --max-width: 1050px;
+      --warning: #ffcc66;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(77,163,255,0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(122,240,200,0.08), transparent 22%),
+        linear-gradient(180deg, #0a0f1d 0%, #0b1020 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(7,12,25,0.88);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .nav {
+      max-width: var(--max-width);
+      margin: auto;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-weight: 800;
+      color: white;
+      font-size: 1.1rem;
+      letter-spacing: 0.3px;
+    }
+
+    .brand span {
+      color: var(--accent-2);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hero {
+      padding: 70px 20px 40px;
+      max-width: var(--max-width);
+      margin: auto;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(77,163,255,0.35);
+      background: rgba(77,163,255,0.08);
+      color: var(--accent-2);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      margin: 0 0 16px;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 850px;
+      margin-bottom: 16px;
+    }
+
+    .series-banner {
+      margin-top: 28px;
+      background: linear-gradient(135deg, rgba(77,163,255,0.12), rgba(122,240,200,0.07));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .series-banner h3 {
+      margin: 0 0 10px;
+    }
+
+    .series-inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .series-pill {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: auto;
+      padding: 0 20px 70px;
+    }
+
+    .section {
+      margin: 0 auto 28px;
+      padding: 30px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      font-size: 1.7rem;
+      margin-bottom: 14px;
+    }
+
+    .section p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .step {
+      margin-bottom: 16px;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+    }
+
+    .step strong {
+      color: white;
+    }
+
+    .highlight {
+      border-left: 4px solid var(--accent);
+      padding: 16px 18px;
+      background: rgba(77,163,255,0.08);
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .warning {
+      border-left: 4px solid var(--warning);
+      padding: 16px 18px;
+      background: rgba(255,204,102,0.08);
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .screenshot-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      display: block;
+      background: #0a0f1d;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .screenshot-caption {
+      padding: 18px 20px 20px;
+    }
+
+    .screenshot-caption h3 {
+      margin: 0 0 8px;
+      color: white;
+      font-size: 1.08rem;
+    }
+
+    .screenshot-caption p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .series-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .series-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .series-card .part {
+      font-size: 0.8rem;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .series-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      color: white;
+    }
+
+    .series-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .toc {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .toc a {
+      display: block;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    @media (max-width: 950px) {
+      .card-grid,
+      .series-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .card-grid,
+      .series-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 22px;
+      }
+
+      .hero {
+        padding-top: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">LevelUp<span>SecurityLabs</span></div>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="cloud.html">Cloud</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Cloud Lab Series • Part 1</div>
+  <h1>What Account Should You Use for Azure Security Labs?</h1>
+  <p>
+    One of the easiest ways to make Azure labs frustrating or expensive is starting with the wrong account.
+    This guide breaks down the safest option for beginners, how subscriptions work, what free tiers actually help,
+    and how to avoid costs before they surprise you.
+  </p>
+  <p>
+    This is the first post in a practical Azure lab series built for people who want to move beyond certification study
+    and start building real hands-on cloud security experience.
+  </p>
+
+  <div class="series-banner">
+    <h3>This post is part of a multi-part series</h3>
+    <p>
+      Start with account setup and cost control first. Then build the lab step by step into identity, logging,
+      monitoring, and security workflows.
+    </p>
+    <div class="series-inline">
+      <span class="series-pill">Part 1: Azure Account & Cost Basics</span>
+      <span class="series-pill">Part 2: Build Your First Safe Lab</span>
+      <span class="series-pill">Part 3: Identity & Access Foundations</span>
+      <span class="series-pill">Part 4: Logging, Monitoring & Security Visibility</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+
+  <section class="section">
+    <h2>What you’ll learn in this post</h2>
+    <div class="toc">
+      <a href="#dont-use-work">Why you should not use your work account</a>
+      <a href="#best-option">The best Azure account option for labs</a>
+      <a href="#subscriptions">A simple explanation of subscriptions</a>
+      <a href="#avoid-costs">How to avoid unnecessary Azure costs</a>
+      <a href="#screenshots">Real screenshots walkthrough section</a>
+      <a href="#series">Where this series goes next</a>
+    </div>
+  </section>
+
+  <section class="section" id="dont-use-work">
+    <h2>The #1 rule: do not use your work account</h2>
+    <p>
+      Even if you already have access to Microsoft 365, Entra ID, Azure subscriptions, or security tooling at work,
+      your employer’s tenant should not be your practice environment.
+    </p>
+
+    <div class="warning">
+      <strong>Why this matters:</strong><br><br>
+      • You may violate company policy<br>
+      • You can trigger alerts or investigations<br>
+      • You do not control permissions or billing<br>
+      • Lab mistakes can affect real users and production services
+    </div>
+
+    <p>
+      A proper lab should be disposable, isolated, and fully under your control. That freedom is what lets you test,
+      misconfigure, fix, rebuild, and actually learn.
+    </p>
+  </section>
+
+  <section class="section" id="best-option">
+    <h2>Your best option: a personal Azure account</h2>
+    <p>
+      For most people starting cloud security labs, the best path is a personal Microsoft account tied to a personal Azure subscription.
+      This gives you full ownership of the environment and keeps your learning separate from work.
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Free Azure Account</h3>
+        <p>
+          Best for getting started. Good for testing the portal, creating small resources, and learning the basics without committing to a large spend.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Pay-As-You-Go</h3>
+        <p>
+          Best once you move beyond the initial free period. It works well if you stay disciplined with resource size, shutdown habits, and cleanup.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Free / Low-Cost Services</h3>
+        <p>
+          Some Azure services remain free or inexpensive within limited usage. This is ideal for lab repetition and small proof-of-concept builds.
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <strong>Good beginner setup:</strong><br><br>
+      Personal Microsoft account → one Azure subscription → one resource group per lab → budget alerts turned on from day one.
+    </div>
+  </section>
+
+  <section class="section" id="subscriptions">
+    <h2>How subscriptions work in plain English</h2>
+    <p>
+      Azure terminology can feel more complicated than it needs to be at first. For lab purposes, here is the simple version.
+    </p>
+
+    <div class="step">
+      <strong>Subscription = billing boundary</strong><br>
+      This is the main container tied to spending, access, and ownership.
+    </div>
+
+    <div class="step">
+      <strong>Resource Group = lab folder</strong><br>
+      This is where you organize related resources so they can be managed or deleted together.
+    </div>
+
+    <div class="step">
+      <strong>Resources = the things you build</strong><br>
+      Virtual machines, storage accounts, virtual networks, Log Analytics workspaces, key vaults, and so on.
+    </div>
+
+    <div class="highlight">
+      For labs, keep things simple: one resource group for each project or lesson. That makes cleanup much easier.
+    </div>
+  </section>
+
+  <section class="section" id="avoid-costs">
+    <h2>How to avoid unnecessary costs</h2>
+    <p>
+      Azure is a great learning platform, but it is also very easy to leave something running and forget about it.
+      Good cost habits are part of good lab design.
+    </p>
+
+    <div class="step">
+      <strong>1. Create a budget immediately</strong><br>
+      Do not wait until later. Add a budget alert as soon as the subscription is available.
+    </div>
+
+    <div class="step">
+      <strong>2. Use the smallest practical resource sizes</strong><br>
+      For learning, you usually do not need large VM sizes, premium disks, or high-throughput services.
+    </div>
+
+    <div class="step">
+      <strong>3. Shut down what you are not using</strong><br>
+      Compute resources can continue costing money even when you are not actively touching them.
+    </div>
+
+    <div class="step">
+      <strong>4. Delete entire lab environments when finished</strong><br>
+      If a lab is done, remove the resource group. That is often the cleanest and safest option.
+    </div>
+
+    <div class="step">
+      <strong>5. Be careful with security add-ons and always-on analytics</strong><br>
+      Advanced logging, monitoring, SIEM features, and continuous protection services can become the fastest cost multipliers in a lab.
+    </div>
+  </section>
+
+  <section class="section" id="screenshots">
+    <h2>Real screenshots walkthrough</h2>
+    <p>
+      This section is designed for real Azure portal screenshots so readers can follow visually instead of only reading text.
+      Replace the sample image paths below with your own screenshots once you capture them.
+    </p>
+
+    <div class="warning">
+      <strong>Tip:</strong> save your screenshots in an <code>images</code> folder and use simple names like
+      <code>azure-signup.png</code>, <code>azure-subscription.png</code>, and <code>azure-budget.png</code>.
+    </div>
+
+    <div class="screenshot-grid">
+
+      <div class="screenshot-card">
+        <img src="images/azure-signup.png" alt="Azure sign-up page screenshot">
+        <div class="screenshot-caption">
+          <h3>Screenshot 1: Starting with a personal Azure account</h3>
+          <p>
+            Show the first sign-up or landing page and explain that this is where the lab journey begins.
+            Call out that this should be a personal account, not a company-managed identity.
+          </p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="images/azure-subscription.png" alt="Azure subscription overview screenshot">
+        <div class="screenshot-caption">
+          <h3>Screenshot 2: Viewing your subscription</h3>
+          <p>
+            Show the subscription overview page and explain that this is the main billing boundary.
+            This is a good place to introduce the idea of cost control before building resources.
+          </p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="images/azure-resource-group.png" alt="Azure resource group creation screenshot">
+        <div class="screenshot-caption">
+          <h3>Screenshot 3: Creating a dedicated resource group for a lab</h3>
+          <p>
+            Show the resource group creation page and explain why isolating each lab into its own group makes cleanup easier and safer.
+          </p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="images/azure-budget-alert.png" alt="Azure budget alert screenshot">
+        <div class="screenshot-caption">
+          <h3>Screenshot 4: Setting a budget alert</h3>
+          <p>
+            Show where to create a budget in Cost Management. This is one of the most important screenshots in the post because it directly reduces mistakes.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="highlight">
+      <strong>Best format for this section:</strong><br><br>
+      Screenshot → short explanation of what the page is → what the reader should click → why it matters for labs.
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Suggested screenshot captions you can use as-is</h2>
+
+    <div class="step">
+      <strong>Account creation:</strong><br>
+      Start with a personal account that you fully control so your lab stays isolated from work and can be rebuilt safely.
+    </div>
+
+    <div class="step">
+      <strong>Subscription page:</strong><br>
+      Think of the subscription as the main billing and ownership container for everything you build in Azure.
+    </div>
+
+    <div class="step">
+      <strong>Resource group creation:</strong><br>
+      Create one resource group per lab so you can organize everything cleanly and remove it all at once later.
+    </div>
+
+    <div class="step">
+      <strong>Budget alert page:</strong><br>
+      Set a budget before you deploy too much. Cost control is part of good cloud security hygiene.
+    </div>
+  </section>
+
+  <section class="section" id="series">
+    <h2>This is now a multi-part series</h2>
+    <p>
+      Instead of making this a one-off post, it works better as the opening guide in a beginner-friendly Azure security lab track.
+      That gives your site structure and gives readers a clear path forward.
+    </p>
+
+    <div class="series-grid">
+      <div class="series-card">
+        <span class="part">Part 1</span>
+        <h3>What Account Should You Use for Azure Security Labs?</h3>
+        <p>
+          Start here. Learn the safest account model, subscription basics, and how to control cost from the beginning.
+        </p>
+        <a href="azure-lab-accounts.html">Read Part 1</a>
+      </div>
+
+      <div class="series-card">
+        <span class="part">Part 2</span>
+        <h3>Build Your First Safe Azure Security Lab</h3>
+        <p>
+          Create a simple lab structure with a resource group, naming standard, region choice, and safe cleanup habits.
+        </p>
+        <a href="azure-first-lab.html">Coming next</a>
+      </div>
+
+      <div class="series-card">
+        <span class="part">Part 3</span>
+        <h3>Identity Basics for Azure Security Labs</h3>
+        <p>
+          Build around users, roles, least privilege, and Entra ID concepts that actually matter in real environments.
+        </p>
+        <a href="azure-identity-basics.html">Coming next</a>
+      </div>
+
+      <div class="series-card">
+        <span class="part">Part 4</span>
+        <h3>Logging, Monitoring, and Security Visibility</h3>
+        <p>
+          Add the visibility layer with logs, workspaces, and the foundations needed for investigations and detections.
+        </p>
+        <a href="azure-logging-monitoring.html">Coming next</a>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <strong>Recommended series title:</strong><br><br>
+      <em>Azure Security Labs for Beginners: From Account Setup to Real-World Skills</em>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Final takeaway</h2>
+    <p>
+      The best lab account is the one you fully control, can afford, and can destroy without consequences.
+      That freedom is what turns cloud study into real cloud skill.
+    </p>
+    <p>
+      Start small. Keep it isolated. Add budget alerts early. Build only what helps you learn.
+    </p>
+
+    <div class="highlight">
+      <strong>Build. Break. Defend. Repeat.</strong>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 LevelUpSecurityLabs</p>
+</footer>
+
+</body>
+</html>
