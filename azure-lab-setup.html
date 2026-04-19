@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azure Lab Setup | LevelUpSecurityLabs</title>
+  <meta name="description" content="A practical guide to choosing the right Azure account for security labs, with diagrams covering subscriptions, free tiers, spending controls, and safe lab design." />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --panel-2: #0f1722;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --line: #30363d;
+      --blue: #58a6ff;
+      --blue-2: #1f6feb;
+      --green: #3fb950;
+      --red: #f85149;
+      --gold: #d29922;
+      --max: 1080px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(31, 111, 235, 0.16), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .banner {
+      background: linear-gradient(90deg, #0b2b52, #1f6feb, #0b2b52);
+      color: #fff;
+      text-align: center;
+      padding: 20px 16px;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    nav {
+      background: rgba(13, 17, 23, 0.96);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-inner a {
+      color: #dbe8ff;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border: 1px solid rgba(88, 166, 255, 0.35);
+      border-radius: 999px;
+      color: #dbe8ff;
+      font-size: 0.9rem;
+      background: rgba(88, 166, 255, 0.08);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      line-height: 1.15;
+      margin: 0 0 16px;
+      color: #fff;
+    }
+
+    .lead {
+      font-size: 1.15rem;
+      color: #d0d7de;
+      max-width: 860px;
+      margin-bottom: 28px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .hero-card, .card {
+      background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(15, 23, 34, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+    }
+
+    .hero-card {
+      margin: 28px 0 36px;
+    }
+
+    .hero-card img, .diagram img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hero-copy {
+      padding: 20px 22px 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .hero-copy strong {
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      color: #fff;
+      font-size: 1.55rem;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      color: var(--blue);
+      margin: 22px 0 8px;
+      font-size: 1.05rem;
+    }
+
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 8px; }
+
+    .callout {
+      border-left: 4px solid var(--blue);
+      background: rgba(88, 166, 255, 0.08);
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin: 18px 0;
+    }
+
+    .warning {
+      border-left-color: var(--red);
+      background: rgba(248, 81, 73, 0.08);
+    }
+
+    .success {
+      border-left-color: var(--green);
+      background: rgba(63, 185, 80, 0.08);
+    }
+
+    .diagram {
+      margin: 18px 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0b1220;
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .checklist {
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .checklist li::before {
+      content: "✓ ";
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .mini-section {
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      margin-top: 20px;
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .container { padding: 28px 16px 56px; }
+      .banner { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">Build. Break. Defend. Repeat.</div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="index.html#labs">Labs</a>
+      <a href="index.html#cloud">Cloud</a>
+      <a href="index.html#detection">Detection</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <span class="eyebrow">Cloud Labs • Azure • Cost Control</span>
+    <h1>Azure Lab Setup</h1>
+    <p class="lead">
+      A practical guide to choosing the right Azure account for security labs, with a focus on subscriptions,
+      free tiers, spending controls, and how to avoid surprise charges when building your first environment.
+    </p>
+    <div class="meta">LevelUpSecurityLabs • Beginner-friendly • Real-world setup guidance</div>
+
+    <section class="hero-card">
+      <img src="a_blog_post_article_titled_choosing_the_right_azu.png" alt="Azure lab setup diagrams showing free account options, pay-as-you-go risks, spending controls, common cost traps, and a recommended starter workflow." />
+      <div class="hero-copy">
+        <strong>Visual walkthrough:</strong> The diagram below gives a quick map of the full decision path — from account selection,
+        to subscription design, to budget controls, to the safest beginner setup for your first Azure security lab.
+      </div>
+    </section>
+
+    <div class="grid">
+      <article>
+        <section class="card">
+          <h2>Why account choice matters</h2>
+          <p>
+            Azure is one of the best platforms for building hands-on security skills, but it becomes expensive quickly if you treat it like a sandbox with no guardrails.
+            The biggest beginner mistakes are simple: leaving VMs running, overusing logging, and building inside the wrong subscription.
+          </p>
+          <div class="callout warning">
+            The goal is not just to build a lab. The goal is to build a lab you can safely afford to keep learning in.
+          </div>
+          <h3>What usually drives surprise charges</h3>
+          <ul>
+            <li>Virtual machines left on overnight or over weekends</li>
+            <li>Log Analytics or Sentinel ingestion growing faster than expected</li>
+            <li>Premium storage or networking resources left behind after testing</li>
+            <li>Using a flexible pay-as-you-go subscription without budget alerts</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Best account option for most beginners</h2>
+          <p>
+            Start with an Azure free account and treat it as a contained practice environment. It gives you room to learn the portal,
+            deploy a few small resources, and understand subscriptions, resource groups, IAM, networking, and logging without jumping directly into a fully open billing model.
+          </p>
+          <h3>Why it works well</h3>
+          <ul class="checklist">
+            <li>Good fit for first labs and learning platform basics</li>
+            <li>Helps you understand what services actually consume money</li>
+            <li>Creates a natural place to test small deployments before scaling</li>
+          </ul>
+          <div class="callout success">
+            Start small with one VM, one resource group, and one budget. That teaches more than spinning up ten services at once.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>When pay-as-you-go makes sense</h2>
+          <p>
+            Once you start testing more advanced security services, richer log pipelines, or repeated lab builds, a pay-as-you-go subscription becomes more realistic.
+            That said, flexibility only helps if you add cost controls first.
+          </p>
+          <h3>Use it when you need</h3>
+          <ul>
+            <li>More advanced Microsoft security services</li>
+            <li>Multi-resource lab topologies with networking and monitoring</li>
+            <li>Repeatable testing that outgrows a basic free-tier approach</li>
+          </ul>
+          <div class="callout warning">
+            Never move into pay-as-you-go first and figure out controls later. Set budgets, alerts, and shutdown plans before deployment.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Recommended Azure lab design</h2>
+          <p>
+            A dedicated lab subscription is the cleanest pattern. Keep it isolated from anything personal, shared, or production-related.
+            Think disposable by design.
+          </p>
+          <ol>
+            <li>Create a dedicated subscription for lab use only</li>
+            <li>Build inside a single resource group per lab or topic</li>
+            <li>Use small B-series or similarly low-cost resources for compute</li>
+            <li>Enable auto-shutdown on all virtual machines</li>
+            <li>Delete or deallocate resources after each exercise</li>
+          </ol>
+          <div class="mini-section">
+            <h3>Good first lab footprint</h3>
+            <ul>
+              <li>1 small VM</li>
+              <li>1 storage account</li>
+              <li>1 network security group</li>
+              <li>1 budget with alert thresholds</li>
+            </ul>
+          </div>
+        </section>
+      </article>
+
+      <aside>
+        <section class="card">
+          <h2>Diagram callouts</h2>
+          <p>
+            The embedded architecture graphic works well as a visual checkpoint inside the post and can also be reused later as a sidebar graphic,
+            featured image, or quick-reference handout for your cloud category.
+          </p>
+          <div class="diagram">
+            <img src="a_blog_post_article_titled_choosing_the_right_azu.png" alt="Preview of Azure lab setup diagram used in the article." />
+          </div>
+          <div class="caption">
+            The diagram summarizes the full flow: account choice, dedicated subscription model, spending controls, cost traps, and a safe starter build.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Spending controls to enable first</h2>
+          <ul class="checklist">
+            <li>Create a monthly budget before deploying resources</li>
+            <li>Trigger alerts at multiple thresholds</li>
+            <li>Turn on VM auto-shutdown immediately</li>
+            <li>Review cost analysis after each lab session</li>
+            <li>Delete unused public IPs, disks, and snapshots</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Common cost traps</h2>
+          <ul>
+            <li>Keeping a VM allocated when you only meant to stop using it</li>
+            <li>Sending too much data into logging or SIEM services</li>
+            <li>Forgetting attached disks after deleting a VM</li>
+            <li>Leaving public IPs and storage behind between labs</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Simple starter recommendation</h2>
+          <p>
+            If you are just getting started, use a free Azure account, deploy one small VM, put a strict budget on the subscription,
+            and tear the lab down after each exercise. That pattern keeps learning high and cost risk low.
+          </p>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card">
+      <h2>Final takeaway</h2>
+      <p>
+        The best Azure lab is not the biggest one. It is the one you can build repeatedly, understand clearly, and afford to keep improving.
+        Start with guardrails, keep the environment isolated, and make cost control part of the learning process from day one.
+      </p>
+      <div class="callout success">
+        Build smart. Break safely. Defend better.
+      </div>
+    </section>
+
+    <div class="footer">
+      © 2026 LevelUpSecurityLabs.com | Azure Lab Setup
+    </div>
+  </main>
+</body>
+</html>
