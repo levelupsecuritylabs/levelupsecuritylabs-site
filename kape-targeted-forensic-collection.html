@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using KAPE for Targeted Forensic Collection in a Lab | LevelUpSecurityLabs</title>
+  <meta name="description" content="Learn where KAPE fits, what artifacts to grab first, and how to keep collections focused and useful in a security lab." />
+  <style>
+    :root{
+      --bg:#0a0f1c;
+      --bg2:#10182b;
+      --panel:#121c31;
+      --panel2:#16233d;
+      --line:#26385c;
+      --text:#e8eefc;
+      --muted:#a9b7d3;
+      --accent:#67d5ff;
+      --accent2:#7bffb0;
+      --warn:#ffca6b;
+      --shadow:0 14px 40px rgba(0,0,0,.34);
+      --radius:18px;
+      --max:1100px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(103,213,255,.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(123,255,176,.10), transparent 24%),
+        linear-gradient(180deg, #08101e 0%, #0b1220 100%);
+      line-height:1.65;
+    }
+
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(12px);
+      background:rgba(8,14,26,.78);
+      border-bottom:1px solid rgba(103,213,255,.12);
+    }
+
+    .nav{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand strong{
+      font-size:1.02rem;
+      letter-spacing:.2px;
+    }
+
+    .brand span{
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .nav-links{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      font-size:.95rem;
+    }
+
+    .hero{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:72px 20px 28px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding:8px 12px;
+      border:1px solid rgba(103,213,255,.18);
+      background:rgba(103,213,255,.08);
+      color:var(--accent);
+      border-radius:999px;
+      font-size:.84rem;
+      font-weight:700;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:18px 0 14px;
+      font-size:clamp(2.2rem, 5vw, 3.8rem);
+      line-height:1.08;
+      letter-spacing:-.03em;
+      max-width:900px;
+    }
+
+    .subtitle{
+      max-width:850px;
+      color:var(--muted);
+      font-size:1.08rem;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.3fr .9fr;
+      gap:28px;
+      align-items:start;
+      margin-top:28px;
+    }
+
+    .hero-card, .callout, .diagram-wrap, .content-card, .nextup{
+      background:linear-gradient(180deg, rgba(18,28,49,.94), rgba(12,21,36,.96));
+      border:1px solid rgba(103,213,255,.12);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card{
+      padding:22px;
+    }
+
+    .hero-card h2, .diagram-wrap h2, .content-card h2, .nextup h2{
+      margin-top:0;
+      font-size:1.2rem;
+    }
+
+    .callout{
+      padding:20px;
+      border-left:4px solid var(--accent2);
+    }
+
+    .callout strong{
+      color:#fff;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .meta span{
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    main{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:16px 20px 80px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 310px;
+      gap:28px;
+    }
+
+    .content-card{
+      padding:30px;
+      overflow:hidden;
+    }
+
+    .content-card h2{
+      margin:36px 0 10px;
+      font-size:1.55rem;
+      letter-spacing:-.02em;
+    }
+
+    .content-card h3{
+      margin:24px 0 8px;
+      font-size:1.12rem;
+      color:#fff;
+    }
+
+    .content-card p{
+      margin:0 0 14px;
+      color:#dbe6fa;
+    }
+
+    .content-card ul, .content-card ol{
+      padding-left:22px;
+      margin:0 0 16px;
+    }
+
+    .content-card li{
+      margin:8px 0;
+      color:#dbe6fa;
+    }
+
+    .lede{
+      font-size:1.06rem;
+      color:#f2f6ff;
+    }
+
+    .quote{
+      margin:18px 0;
+      padding:16px 18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-left:4px solid var(--warn);
+      border-radius:14px;
+      color:#eef4ff;
+      font-weight:600;
+    }
+
+    .diagram-wrap{
+      margin:22px 0 26px;
+      padding:20px;
+    }
+
+    .diagram-wrap p{
+      margin-bottom:16px;
+      color:var(--muted);
+    }
+
+    .diagram{
+      width:100%;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(103,213,255,.12);
+      background:linear-gradient(180deg,#0d172a,#0b1323);
+    }
+
+    .code{
+      margin:18px 0 20px;
+      background:#09101b;
+      border:1px solid rgba(103,213,255,.16);
+      border-radius:14px;
+      overflow:auto;
+    }
+
+    pre{
+      margin:0;
+      padding:18px;
+      color:#dff7ff;
+      font-size:.95rem;
+      line-height:1.6;
+    }
+
+    code{
+      font-family: "Cascadia Code","Consolas","Menlo",monospace;
+    }
+
+    .tip, .warning{
+      margin:18px 0;
+      padding:16px 18px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .tip{
+      background:rgba(123,255,176,.07);
+    }
+
+    .warning{
+      background:rgba(255,202,107,.08);
+    }
+
+    .section-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin:16px 0;
+    }
+
+    .mini-card{
+      padding:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+    }
+
+    .mini-card strong{
+      display:block;
+      margin-bottom:8px;
+      color:#fff;
+    }
+
+    .sidebar{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      position:sticky;
+      top:84px;
+      align-self:start;
+    }
+
+    .toc, .author, .nextup{
+      padding:20px;
+    }
+
+    .toc h3, .author h3, .nextup h3{
+      margin:0 0 12px;
+      font-size:1rem;
+    }
+
+    .toc a{
+      display:block;
+      padding:8px 0;
+      color:#dbe6fa;
+      border-bottom:1px dashed rgba(255,255,255,.08);
+      font-size:.95rem;
+    }
+
+    .toc a:last-child{border-bottom:none}
+
+    .author p, .nextup p{
+      color:var(--muted);
+      margin:0 0 10px;
+      font-size:.94rem;
+    }
+
+    .nextup ul{
+      padding-left:18px;
+      margin:10px 0 0;
+    }
+
+    .footer{
+      border-top:1px solid rgba(103,213,255,.12);
+      background:rgba(8,13,24,.88);
+      margin-top:20px;
+    }
+
+    .footer-inner{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:24px 20px 40px;
+      color:var(--muted);
+      font-size:.94rem;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 980px){
+      .hero-grid, main, .section-grid{
+        grid-template-columns:1fr;
+      }
+      .sidebar{
+        position:static;
+      }
+    }
+
+    @media (max-width: 640px){
+      .hero{padding-top:48px}
+      .content-card{padding:22px}
+      .nav{padding:12px 16px}
+      .nav-links{gap:12px; font-size:.9rem}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <div class="brand">
+        <strong>LevelUpSecurityLabs</strong>
+        <span>Build. Break. Defend. Repeat.</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="index.html#latest-posts">Latest Posts</a>
+        <a href="index.html#categories">Categories</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Digital Forensics • Lab Guide</div>
+    <h1>Using KAPE for Targeted Forensic Collection in a Lab</h1>
+    <p class="subtitle">
+      Learn where KAPE fits, what artifacts to grab first, and how to keep collections focused and useful.
+      This guide is built for hands-on defenders who want fast triage, cleaner evidence, and better lab habits.
+    </p>
+
+    <div class="hero-grid">
+      <div class="hero-card">
+        <h2>What this post covers</h2>
+        <ul>
+          <li>Where KAPE fits in an investigation workflow</li>
+          <li>Which artifacts to collect first when time matters</li>
+          <li>How to avoid over-collecting and drowning in noise</li>
+          <li>A simple KAPE lab workflow you can recreate at home</li>
+        </ul>
+        <div class="meta">
+          <span>Skill level: Beginner to Intermediate</span>
+          <span>Focus: Windows Forensics</span>
+          <span>Use case: Rapid triage</span>
+        </div>
+      </div>
+
+      <aside class="callout">
+        <strong>Core idea:</strong>
+        KAPE is not about collecting everything. It is about collecting the right evidence fast enough to answer what happened, when it happened, and what to do next.
+      </aside>
+    </div>
+  </section>
+
+  <main>
+    <article class="content-card">
+      <p class="lede">
+        When an alert hits, investigators often waste time by grabbing too much data too early. Full disk images and broad collections have their place, but they are not always the best first move. In a lab or real incident, KAPE helps you collect the artifacts that matter most so you can move from alert to evidence quickly.
+      </p>
+
+      <div class="diagram-wrap" id="diagram">
+        <h2>KAPE Lab Workflow Diagram</h2>
+        <p>
+          This simple lab flow shows where KAPE fits between detection and deeper analysis. You can recreate this in a Windows VM with an EDR agent, a small attacker simulation, and a central folder for results.
+        </p>
+
+        <div class="diagram">
+          <svg viewBox="0 0 1200 700" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KAPE lab diagram">
+            <defs>
+              <linearGradient id="bgGrad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#101b31"/>
+                <stop offset="100%" stop-color="#0b1323"/>
+              </linearGradient>
+              <linearGradient id="boxGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#162743"/>
+                <stop offset="100%" stop-color="#13213a"/>
+              </linearGradient>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(0,0,0,.35)"/>
+              </filter>
+              <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M0,0 L12,6 L0,12 z" fill="#67d5ff"/>
+              </marker>
+            </defs>
+
+            <rect width="1200" height="700" fill="url(#bgGrad)"/>
+
+            <text x="60" y="62" fill="#eaf2ff" font-size="30" font-family="Inter, Arial, sans-serif" font-weight="700">
+              Targeted Forensic Collection Lab
+            </text>
+            <text x="60" y="94" fill="#9fb2d5" font-size="18" font-family="Inter, Arial, sans-serif">
+              Alert → Focused Collection → Parsing → Timeline → Decision
+            </text>
+
+            <rect x="65" y="150" rx="20" ry="20" width="250" height="150" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="95" y="195" fill="#67d5ff" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">1. Detection Source</text>
+            <text x="95" y="232" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">EDR / SIEM / Email Alert</text>
+            <text x="95" y="262" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">Examples: PowerShell alert, suspicious</text>
+            <text x="95" y="286" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">download, persistence behavior</text>
+
+            <rect x="365" y="150" rx="20" ry="20" width="250" height="150" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="395" y="195" fill="#7bffb0" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">2. Windows Endpoint</text>
+            <text x="395" y="232" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">Victim VM / Test Host</text>
+            <text x="395" y="262" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">Run a small simulation or</text>
+            <text x="395" y="286" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">replay a realistic alert</text>
+
+            <rect x="665" y="120" rx="20" ry="20" width="470" height="210" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="695" y="165" fill="#67d5ff" font-size="24" font-family="Inter, Arial, sans-serif" font-weight="700">3. KAPE Targeted Collection</text>
+            <text x="695" y="205" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">Collect only what answers the alert</text>
+
+            <rect x="700" y="228" rx="14" ry="14" width="120" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="734" y="254" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">Prefetch</text>
+
+            <rect x="836" y="228" rx="14" ry="14" width="130" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="857" y="254" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">Event Logs</text>
+
+            <rect x="982" y="228" rx="14" ry="14" width="120" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="1007" y="254" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">Registry</text>
+
+            <rect x="700" y="282" rx="14" ry="14" width="120" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="720" y="308" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">AmCache</text>
+
+            <rect x="836" y="282" rx="14" ry="14" width="130" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="850" y="308" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">Browser Data</text>
+
+            <rect x="982" y="282" rx="14" ry="14" width="120" height="42" fill="#0f1a2d" stroke="#3f5d92"/>
+            <text x="1006" y="308" fill="#eaf2ff" font-size="16" font-family="Inter, Arial, sans-serif">Tasks</text>
+
+            <rect x="170" y="425" rx="20" ry="20" width="290" height="165" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="200" y="468" fill="#67d5ff" font-size="23" font-family="Inter, Arial, sans-serif" font-weight="700">4. Parse and Review</text>
+            <text x="200" y="506" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">Use KAPE modules and</text>
+            <text x="200" y="532" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">Eric Zimmerman tools</text>
+            <text x="200" y="564" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">Keep outputs structured and small</text>
+
+            <rect x="505" y="425" rx="20" ry="20" width="290" height="165" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="535" y="468" fill="#7bffb0" font-size="23" font-family="Inter, Arial, sans-serif" font-weight="700">5. Build Timeline</text>
+            <text x="535" y="506" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">Correlate execution, persistence,</text>
+            <text x="535" y="532" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">downloads, and user activity</text>
+            <text x="535" y="564" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">Answer what ran, when, and why</text>
+
+            <rect x="840" y="425" rx="20" ry="20" width="290" height="165" fill="url(#boxGrad)" stroke="#324b77" filter="url(#shadow)"/>
+            <text x="870" y="468" fill="#ffca6b" font-size="23" font-family="Inter, Arial, sans-serif" font-weight="700">6. Decision Point</text>
+            <text x="870" y="506" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">False positive, contain, or escalate</text>
+            <text x="870" y="532" fill="#eaf2ff" font-size="18" font-family="Inter, Arial, sans-serif">based on evidence</text>
+            <text x="870" y="564" fill="#b8c7e6" font-size="16" font-family="Inter, Arial, sans-serif">Focused collection drives faster action</text>
+
+            <line x1="315" y1="225" x2="365" y2="225" stroke="#67d5ff" stroke-width="5" marker-end="url(#arrow)"/>
+            <line x1="615" y1="225" x2="665" y2="225" stroke="#67d5ff" stroke-width="5" marker-end="url(#arrow)"/>
+            <line x1="800" y1="330" x2="315" y2="425" stroke="#67d5ff" stroke-width="4" marker-end="url(#arrow)"/>
+            <line x1="460" y1="508" x2="505" y2="508" stroke="#67d5ff" stroke-width="5" marker-end="url(#arrow)"/>
+            <line x1="795" y1="508" x2="840" y2="508" stroke="#67d5ff" stroke-width="5" marker-end="url(#arrow)"/>
+          </svg>
+        </div>
+      </div>
+
+      <h2 id="why">Why KAPE matters in real investigations</h2>
+      <p>
+        KAPE shines during rapid triage. Instead of waiting on a full image or collecting massive volumes of data you may never use, you can pull the artifacts most likely to answer the alert in front of you.
+      </p>
+      <div class="quote">
+        KAPE does not replace full forensics. It helps you get to the right evidence fast enough to make smarter decisions early.
+      </div>
+      <p>
+        That makes it ideal for labs, because it teaches the same habit good responders need in production: stay focused, collect deliberately, and build your understanding from evidence instead of assumptions.
+      </p>
+
+      <h2 id="workflow">Where KAPE fits in your workflow</h2>
+      <ol>
+        <li>An alert fires from your EDR, SIEM, or email telemetry.</li>
+        <li>You scope the affected endpoint or user.</li>
+        <li>You use KAPE to grab the highest-value artifacts.</li>
+        <li>You parse results and build a timeline.</li>
+        <li>You decide whether to escalate, contain, or close.</li>
+      </ol>
+
+      <div class="tip">
+        <strong>Good mental model:</strong> KAPE sits between detection and deep forensics. It is the fast triage layer that helps you decide what comes next.
+      </div>
+
+      <h2 id="mistakes">The biggest mistake: over-collecting</h2>
+      <p>
+        New analysts often grab everything “just in case.” That usually leads to slower collections, larger datasets, and more time spent sorting noise instead of finding signal.
+      </p>
+      <p>
+        A better question is: <strong>What artifacts would prove or disprove this alert?</strong>
+      </p>
+      <div class="warning">
+        <strong>Rule of thumb:</strong> If an artifact does not help you answer the current investigation question, do not make it your first collection priority.
+      </div>
+
+      <h2 id="artifacts">What artifacts to grab first</h2>
+      <div class="section-grid">
+        <div class="mini-card">
+          <strong>Execution evidence</strong>
+          Prefetch, AmCache, and ShimCache help show what ran on the host and when it likely executed.
+        </div>
+        <div class="mini-card">
+          <strong>Persistence data</strong>
+          Run keys, services, startup folders, and scheduled tasks help reveal how access might survive a reboot.
+        </div>
+        <div class="mini-card">
+          <strong>User activity</strong>
+          Jump Lists, recent files, and shell artifacts help separate legitimate user behavior from attacker behavior.
+        </div>
+        <div class="mini-card">
+          <strong>Browser data</strong>
+          History and downloads are often critical in phishing, payload delivery, and suspicious web activity cases.
+        </div>
+      </div>
+      <p>
+        Event logs should also stay high on your list, especially Security, System, PowerShell, and Sysmon if the lab has it enabled.
+      </p>
+
+      <h2 id="targets">Targets and modules</h2>
+      <p>
+        KAPE has two ideas you want to keep straight:
+      </p>
+      <ul>
+        <li><strong>Targets</strong> are what you collect.</li>
+        <li><strong>Modules</strong> are what you do with that data after collection.</li>
+      </ul>
+      <p>
+        That means your first job is deciding what evidence you need. Your second job is deciding how to parse and review it.
+      </p>
+
+      <h2 id="command">Focused KAPE collection example</h2>
+      <p>
+        Below is a clean example for a lab where you want a practical first-pass collection instead of a giant dump:
+      </p>
+      <div class="code">
+<pre><code>kape.exe --tsource C: --tdest C:\KAPE_Collection --tflush ^
+--target WindowsBasic --target RegistryHives --target EventLogs ^
+--mdest C:\KAPE_Output --module TimelineExplorer</code></pre>
+      </div>
+      <p>
+        This gives you a strong starting point for general triage without immediately overwhelming yourself with unnecessary artifacts.
+      </p>
+
+      <h2 id="scenario">Example lab scenario</h2>
+      <p>
+        Imagine your EDR raises a suspicious PowerShell alert. Instead of starting with broad collection, focus on artifacts tied to likely execution, delivery, and persistence.
+      </p>
+      <ul>
+        <li>Event logs for PowerShell execution details</li>
+        <li>Prefetch and AmCache for execution evidence</li>
+        <li>Registry and scheduled tasks for persistence</li>
+        <li>Browser artifacts for initial access and downloads</li>
+      </ul>
+      <p>
+        Once you parse those, build a timeline and answer the core questions: what ran, what spawned it, how it got there, and whether the activity looks like a user or an attacker.
+      </p>
+
+      <h2 id="timeline">Build a timeline, not just a pile of files</h2>
+      <p>
+        KAPE gets the evidence, but the timeline gives the story. When you correlate execution, browser activity, persistence, and logs into one sequence, the investigation becomes much easier to reason through.
+      </p>
+      <p>
+        A timeline helps you:
+      </p>
+      <ul>
+        <li>Confirm what happened first</li>
+        <li>Spot follow-on actions</li>
+        <li>Connect different artifacts to the same event chain</li>
+        <li>Separate normal activity from suspicious behavior</li>
+      </ul>
+
+      <h2 id="challenge">Lab challenge</h2>
+      <ol>
+        <li>Use a Windows VM and trigger a suspicious PowerShell download test.</li>
+        <li>Run a targeted KAPE collection against the endpoint.</li>
+        <li>Parse artifacts and review execution, browser, and persistence data.</li>
+        <li>Build a simple timeline and write a one-page case summary.</li>
+      </ol>
+      <p>
+        Try to answer these three questions clearly:
+      </p>
+      <ul>
+        <li>What executed?</li>
+        <li>When did it execute?</li>
+        <li>How did it arrive on the host?</li>
+      </ul>
+
+      <h2 id="final">Final thoughts</h2>
+      <p>
+        KAPE is one of the best tools to learn when you want to build real incident response instincts. It teaches focus. It teaches evidence selection. And it teaches you to collect with purpose instead of panic.
+      </p>
+      <p>
+        If you get comfortable using it in a lab, you are building a skill that transfers directly into endpoint triage, threat hunting, and early-stage incident response.
+      </p>
+    </article>
+
+    <aside class="sidebar">
+      <section class="toc hero-card">
+        <h3>On this page</h3>
+        <a href="#diagram">KAPE Lab Workflow Diagram</a>
+        <a href="#why">Why KAPE matters</a>
+        <a href="#workflow">Where KAPE fits</a>
+        <a href="#mistakes">Avoid over-collecting</a>
+        <a href="#artifacts">Artifacts to grab first</a>
+        <a href="#targets">Targets and modules</a>
+        <a href="#command">Collection example</a>
+        <a href="#scenario">Lab scenario</a>
+        <a href="#timeline">Build a timeline</a>
+        <a href="#challenge">Lab challenge</a>
+      </section>
+
+      <section class="author hero-card">
+        <h3>About this post</h3>
+        <p>
+          Built for LevelUpSecurityLabs readers who want practical lab content they can test, repeat, and apply to real investigations.
+        </p>
+      </section>
+
+      <section class="nextup">
+        <h3>Next up</h3>
+        <ul>
+          <li>Building a super timeline from KAPE artifacts</li>
+          <li>Using KAPE through EDR live response</li>
+          <li>Mapping KAPE collections to MITRE ATT&amp;CK</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>LevelUpSecurityLabs • Build. Break. Defend. Repeat.</div>
+      <div>Post topic: Digital Forensics / KAPE / Lab Workflow</div>
+    </div>
+  </footer>
+</body>
+</html>
