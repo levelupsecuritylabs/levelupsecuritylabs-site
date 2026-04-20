@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What To Do When Your Entra ID Trial Expires | LevelUpSecurityLabs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0b0f14;
+            color: #e6edf3;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        header {
+            background: #111827;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #1f2937;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        header p {
+            color: #9ca3af;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        h2 {
+            color: #58a6ff;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 5px;
+        }
+        .box {
+            background: #111827;
+            padding: 15px;
+            border-left: 4px solid #58a6ff;
+            margin: 20px 0;
+        }
+        .warning {
+            border-left-color: #f97316;
+        }
+        .success {
+            border-left-color: #10b981;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #1f2937;
+            color: #9ca3af;
+            margin-top: 40px;
+        }
+        a {
+            color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🔐 What To Do When Your Entra ID Trial Expires</h1>
+    <p>Build. Break. Defend. Repeat.</p>
+</header>
+
+<div class="container">
+
+    <p>If you're building security labs in <strong>Microsoft Entra ID</strong> (formerly Azure AD), hitting the 30-day trial expiration is inevitable.</p>
+
+    <div class="box warning">
+        <strong>⚠️ “Your trial has expired.”</strong><br>
+        Now what?
+    </div>
+
+    <p>Most people stop here. You shouldn’t. This is actually where your learning gets stronger.</p>
+
+    <h2>🧠 What Actually Expires?</h2>
+
+    <p>When your trial (P1, P2, or Microsoft 365 E5) ends:</p>
+
+    <div class="box">
+        <strong>❌ You Lose:</strong>
+        <ul>
+            <li>Conditional Access (advanced features)</li>
+            <li>Identity Protection</li>
+            <li>Privileged Identity Management (PIM)</li>
+            <li>Advanced audit logs</li>
+        </ul>
+    </div>
+
+    <div class="box success">
+        <strong>✅ You Keep:</strong>
+        <ul>
+            <li>Your tenant (this is critical)</li>
+            <li>Users and groups</li>
+            <li>Basic configurations</li>
+        </ul>
+    </div>
+
+    <p><strong>Your lab is not gone — it’s just downgraded.</strong></p>
+
+    <h2>⚠️ What Breaks?</h2>
+
+    <ul>
+        <li>Conditional Access policies stop enforcing</li>
+        <li>Risk detections disappear</li>
+        <li>PIM roles revert to permanent assignments</li>
+        <li>Advanced logs become unavailable</li>
+    </ul>
+
+    <div class="box">
+        💡 <strong>Pro Tip:</strong> This is a perfect opportunity to observe what a weaker security posture looks like.
+    </div>
+
+    <h2>🔄 Option 1 — Upgrade Selectively</h2>
+
+    <p>Instead of licensing everything:</p>
+    <ul>
+        <li>License 1–2 users with Entra ID P2</li>
+        <li>Use them for testing advanced features</li>
+    </ul>
+
+    <p>This keeps costs low while preserving functionality for labs.</p>
+
+    <h2>🧪 Option 2 — Rebuild (Recommended)</h2>
+
+    <p>This is where real learning happens.</p>
+
+    <ul>
+        <li>Create a new trial tenant</li>
+        <li>Rebuild your environment from scratch</li>
+        <li>Improve your design each time</li>
+    </ul>
+
+    <div class="box success">
+        💡 Treat each rebuild like a new version of your lab.
+    </div>
+
+    <h2>🧱 Option 3 — Hybrid Lab Strategy</h2>
+
+    <ul>
+        <li>Keep your expired tenant</li>
+        <li>Create a new active trial tenant</li>
+        <li>Test cross-tenant scenarios</li>
+    </ul>
+
+    <p>This simulates real enterprise environments.</p>
+
+    <h2>💸 Option 4 — Use Free Credits</h2>
+
+    <ul>
+        <li>Leverage Azure free credits</li>
+        <li>Spin up short-term lab infrastructure</li>
+    </ul>
+
+    <div class="box warning">
+        ⚠️ Always shut down resources to avoid surprise charges.
+    </div>
+
+    <h2>🛡️ Option 5 — Focus on What Still Works</h2>
+
+    <ul>
+        <li>User and group management</li>
+        <li>RBAC and permissions</li>
+        <li>Authentication flows</li>
+        <li>App registrations and OAuth</li>
+    </ul>
+
+    <p>You don’t need premium features to build strong fundamentals.</p>
+
+    <h2>🔥 Real-World Insight</h2>
+
+    <div class="box">
+        Licenses expire. Budgets get cut. Features disappear.<br><br>
+        <strong>The engineers who adapt are the ones who stand out.</strong>
+    </div>
+
+    <h2>🧭 Recommended Path</h2>
+
+    <ol>
+        <li>Keep your expired tenant</li>
+        <li>Create a new trial tenant</li>
+        <li>Rebuild everything</li>
+        <li>Document your process</li>
+        <li>Add attack + detection scenarios</li>
+    </ol>
+
+    <h2>🧪 Next Lab Idea</h2>
+
+    <div class="box">
+        Build a Conditional Access bypass lab:
+        <ul>
+            <li>Create policies</li>
+            <li>Simulate attacker login</li>
+            <li>Observe behavior after expiration</li>
+            <li>Rebuild stronger defenses</li>
+        </ul>
+    </div>
+
+    <h2>🏁 Final Thoughts</h2>
+
+    <p>Your trial expiring isn’t a problem — it’s part of the lab.</p>
+
+    <div class="box success">
+        🔁 Build it again<br>
+        🔍 Break it differently<br>
+        🛡️ Defend it better
+    </div>
+
+</div>
+
+<footer>
+    © 2026 LevelUpSecurityLabs | Build. Break. Defend. Repeat.
+</footer>
+
+</body>
+</html>
