@@ -395,10 +395,10 @@
     <div class="toc">
       <a href="#dont-use-work">Why you should not use your work account</a>
       <a href="#best-option">The best Azure account option for labs</a>
-      <a href="#subscriptions">A simple explanation of subscriptions</a>
+      <a href="#subscriptions">How subscriptions work</a>
       <a href="#avoid-costs">How to avoid unnecessary Azure costs</a>
-      <a href="#screenshots">Real screenshots walkthrough section</a>
-      <a href="#series">Where this series goes next</a>
+      <a href="#screenshots">Azure portal walkthrough</a>
+      <a href="#series">Azure security lab series</a>
     </div>
   </section>
 
@@ -519,98 +519,61 @@
   </section>
 
   <section class="section" id="screenshots">
-    <h2>Real screenshots walkthrough</h2>
+    <h2>Azure portal walkthrough</h2>
     <p>
-      This section is designed for real Azure portal screenshots so readers can follow visually instead of only reading text.
-      Replace the sample image paths below with your own screenshots once you capture them.
+      The following screenshots walk through the core setup flow for building a safe Azure lab environment.
+      Each step highlights the key areas to understand before deploying resources.
     </p>
-
-    <div class="warning">
-      <strong>Tip:</strong> save your screenshots in an <code>images</code> folder and use simple names like
-      <code>azure-signup.png</code>, <code>azure-subscription.png</code>, and <code>azure-budget.png</code>.
-    </div>
 
     <div class="screenshot-grid">
 
       <div class="screenshot-card">
-        <img src="images/azure-signup.png" alt="Azure sign-up page screenshot">
+        <img src="images/azure_screenshot_1.png" alt="Azure sign-up page">
         <div class="screenshot-caption">
-          <h3>Screenshot 1: Starting with a personal Azure account</h3>
+          <h3>Starting with a personal Azure account</h3>
           <p>
-            Show the first sign-up or landing page and explain that this is where the lab journey begins.
-            Call out that this should be a personal account, not a company-managed identity.
+            Begin with a personal account that you fully control. This keeps your lab isolated and allows you to freely test, reset, and rebuild environments.
           </p>
         </div>
       </div>
 
       <div class="screenshot-card">
-        <img src="images/azure_screenshot_2.png" alt="Azure subscription overview screenshot">
+        <img src="images/azure_screenshot_2.png" alt="Azure subscription overview">
         <div class="screenshot-caption">
-          <h3>Screenshot 2: Viewing your subscription</h3>
+          <h3>Viewing your subscription</h3>
           <p>
-            Show the subscription overview page and explain that this is the main billing boundary.
-            This is a good place to introduce the idea of cost control before building resources.
+            The subscription acts as the primary boundary for billing, access, and resource ownership within your lab environment.
           </p>
         </div>
       </div>
 
       <div class="screenshot-card">
-        <img src="images/azure_screenshot_3.png" alt="Azure resource group creation screenshot">
+        <img src="images/azure_screenshot_3.png" alt="Azure resource group creation">
         <div class="screenshot-caption">
-          <h3>Screenshot 3: Creating a dedicated resource group for a lab</h3>
+          <h3>Creating a resource group</h3>
           <p>
-            Show the resource group creation page and explain why isolating each lab into its own group makes cleanup easier and safer.
+            Organize each lab into its own resource group so environments can be managed and removed cleanly when no longer needed.
           </p>
         </div>
       </div>
 
       <div class="screenshot-card">
-        <img src="images/azure_screenshot_4.png" alt="Azure budget alert screenshot">
+        <img src="images/azure_screenshot_4.png" alt="Azure budget alert setup">
         <div class="screenshot-caption">
-          <h3>Screenshot 4: Setting a budget alert</h3>
+          <h3>Setting a budget alert</h3>
           <p>
-            Show where to create a budget in Cost Management. This is one of the most important screenshots in the post because it directly reduces mistakes.
+            Budget alerts provide visibility into spending and help prevent unexpected costs as you build and test resources.
           </p>
         </div>
       </div>
 
-    </div>
-
-    <div class="highlight">
-      <strong>Best format for this section:</strong><br><br>
-      Screenshot → short explanation of what the page is → what the reader should click → why it matters for labs.
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Suggested screenshot captions you can use as-is</h2>
-
-    <div class="step">
-      <strong>Account creation:</strong><br>
-      Start with a personal account that you fully control so your lab stays isolated from work and can be rebuilt safely.
-    </div>
-
-    <div class="step">
-      <strong>Subscription page:</strong><br>
-      Think of the subscription as the main billing and ownership container for everything you build in Azure.
-    </div>
-
-    <div class="step">
-      <strong>Resource group creation:</strong><br>
-      Create one resource group per lab so you can organize everything cleanly and remove it all at once later.
-    </div>
-
-    <div class="step">
-      <strong>Budget alert page:</strong><br>
-      Set a budget before you deploy too much. Cost control is part of good cloud security hygiene.
     </div>
   </section>
 
   <section class="section" id="series">
-    <h2>This is now a multi-part series</h2>
+    <h2>Azure security lab series</h2>
     <p>
-      Instead of making this a one-off post, it works better as the opening guide in a beginner-friendly Azure security lab track.
-      That gives your site structure and gives readers a clear path forward.
+      This guide is part of a structured lab series focused on building practical cloud security skills step by step.
     </p>
 
     <div class="series-grid">
@@ -618,7 +581,7 @@
         <span class="part">Part 1</span>
         <h3>What Account Should You Use for Azure Security Labs?</h3>
         <p>
-          Start here. Learn the safest account model, subscription basics, and how to control cost from the beginning.
+          Learn the safest account model, subscription basics, and how to control cost from the beginning.
         </p>
         <a href="azure-lab-accounts.html">Read Part 1</a>
       </div>
@@ -627,7 +590,7 @@
         <span class="part">Part 2</span>
         <h3>Build Your First Safe Azure Security Lab</h3>
         <p>
-          Create a simple lab structure with a resource group, naming standard, region choice, and safe cleanup habits.
+          Create a simple lab structure with resource groups, naming standards, and safe cleanup practices.
         </p>
         <a href="azure-first-lab.html">Coming next</a>
       </div>
@@ -636,7 +599,7 @@
         <span class="part">Part 3</span>
         <h3>Identity Basics for Azure Security Labs</h3>
         <p>
-          Build around users, roles, least privilege, and Entra ID concepts that actually matter in real environments.
+          Build around users, roles, least privilege, and identity concepts used in real environments.
         </p>
         <a href="azure-identity-basics.html">Coming next</a>
       </div>
@@ -645,15 +608,10 @@
         <span class="part">Part 4</span>
         <h3>Logging, Monitoring, and Security Visibility</h3>
         <p>
-          Add the visibility layer with logs, workspaces, and the foundations needed for investigations and detections.
+          Add logging, monitoring, and visibility needed for investigations and detection workflows.
         </p>
         <a href="azure-logging-monitoring.html">Coming next</a>
       </div>
-    </div>
-
-    <div class="highlight">
-      <strong>Recommended series title:</strong><br><br>
-      <em>Azure Security Labs for Beginners: From Account Setup to Real-World Skills</em>
     </div>
   </section>
 
