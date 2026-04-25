@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWS Phishing Lab Phase 1: Simulating AitM Credential Theft and Mailbox Access | LevelUpSecurityLabs</title>
+  <meta name="description" content="A defensive lab walkthrough that simulates adversary-in-the-middle phishing outcomes and post-compromise mailbox access through EWS-style interaction." />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a30;
+      --panel-2:#0f1730;
+      --text:#e8eefc;
+      --muted:#9fb0d8;
+      --accent:#5eead4;
+      --accent-2:#60a5fa;
+      --border:rgba(255,255,255,0.08);
+      --shadow:0 20px 45px rgba(0,0,0,0.35);
+      --radius:18px;
+      --max:1120px;
+      --warning:#ffcc66;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(94,234,212,0.16), transparent 22%),
+        linear-gradient(180deg, #09101f 0%, #0b1020 100%);
+      line-height:1.6;
+    }
+
+    a{color:inherit;text-decoration:none}
+    a:hover{color:var(--text)}
+    img{max-width:100%}
+
+    .container{width:min(calc(100% - 2rem), var(--max)); margin:0 auto;}
+
+    .nav{position:sticky; top:0; z-index:20; backdrop-filter:blur(12px); background:rgba(11,16,32,0.72); border-bottom:1px solid var(--border);}
+    .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:1rem 0; gap:1rem;}
+    .brand{display:flex; align-items:center; gap:.8rem; font-weight:800; letter-spacing:.3px;}
+    .brand-mark{width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#08101c; font-weight:900; box-shadow:var(--shadow);}
+    .nav-links{display:flex; gap:1.1rem; flex-wrap:wrap; color:var(--muted); font-size:.96rem;}
+
+    .hero{padding:5.5rem 0 3.5rem;}
+    .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:2rem; align-items:center;}
+    .eyebrow{display:inline-flex; align-items:center; gap:.5rem; color:var(--accent); background:rgba(94,234,212,0.08); border:1px solid rgba(94,234,212,0.18); padding:.45rem .75rem; border-radius:999px; font-size:.88rem; margin-bottom:1rem;}
+    h1{font-size:clamp(2.25rem, 4vw, 4.15rem); line-height:1.05; margin:.2rem 0 1rem; letter-spacing:-.03em;}
+    .hero p{color:var(--muted); font-size:1.08rem; max-width:68ch; margin:0 0 1.6rem;}
+    .cta-row{display:flex; gap:.9rem; flex-wrap:wrap; margin-bottom:1.4rem;}
+    .btn{display:inline-flex; align-items:center; justify-content:center; padding:.92rem 1.15rem; border-radius:12px; border:1px solid var(--border); font-weight:700; transition:.2s ease;}
+    .btn-primary{background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#08101c; border:none; box-shadow:var(--shadow);}
+    .btn-secondary{background:rgba(255,255,255,0.02); color:var(--text);}
+    .btn:hover{transform:translateY(-1px)}
+
+    .hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem; box-shadow:var(--shadow);}
+    .terminal{background:#07101b; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.07);}
+    .terminal-top{display:flex; gap:.4rem; padding:.8rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06); background:#091522;}
+    .dot{width:10px;height:10px;border-radius:999px;background:#29425f;}
+    .terminal-body{padding:1rem 1rem 1.15rem; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.93rem; color:#c8ddff;}
+    .terminal-line{margin:.45rem 0}.prompt{color:var(--accent)}.good{color:#9ef0bc}.note{color:#7fb8ff}
+
+    section{padding:1rem 0 3rem;}
+    .section-head{display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem;}
+    .section-head h2{font-size:1.7rem; margin:0; letter-spacing:-.02em;}
+    .section-head p{margin:0; color:var(--muted); max-width:68ch;}
+    .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;}
+    .grid-2{display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;}
+    .card{background:linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem; box-shadow:var(--shadow);}
+    .card h3{margin:.2rem 0 .45rem; font-size:1.12rem;}
+    .card p{margin:0 0 .85rem; color:var(--muted); font-size:.97rem;}
+    .tag{display:inline-block; font-size:.78rem; padding:.3rem .6rem; border-radius:999px; border:1px solid rgba(96,165,250,0.25); color:#b8d6ff; background:rgba(96,165,250,0.07); margin-bottom:.7rem;}
+    .link{color:var(--accent); font-weight:700; font-size:.95rem;}
+
+    .article{padding:0 0 4rem;}
+    .article-card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)); border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem; box-shadow:var(--shadow); margin-bottom:1rem;}
+    .article-card h2{margin:0 0 .75rem; font-size:1.55rem; letter-spacing:-.02em;}
+    .article-card p,.article-card li{color:var(--muted)}
+    .highlight{border-left:4px solid var(--accent); padding:1rem 1.1rem; background:rgba(94,234,212,.08); border-radius:12px; margin-top:1rem; color:var(--text);}
+    .warning{border-left:4px solid var(--warning); padding:1rem 1.1rem; background:rgba(255,204,102,.08); border-radius:12px; margin-top:1rem; color:var(--text);}
+    .toc{display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; margin-top:1rem;}
+    .toc a{display:block; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:.85rem 1rem; color:var(--text);}
+    .step-list{display:grid; gap:1rem;}
+    .step{background:rgba(255,255,255,.025); border:1px solid var(--border); border-radius:16px; padding:1.1rem;}
+    .step strong{color:var(--text);}
+    .step-number{display:inline-grid; place-items:center; width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#08101c; font-weight:900; margin-right:.55rem;}
+    pre{background:#07101b; border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:1rem; overflow-x:auto; color:#c8ddff; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+    code{background:#091321; padding:.18rem .38rem; border-radius:6px; color:#d9e8ff;}
+
+    .diagram-card img,.screenshot-card img{display:block; width:100%; border-radius:14px; border:1px solid var(--border); background:#07101b;}
+    .screenshot-grid{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;}
+    .screenshot-card{background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; box-shadow:var(--shadow);}
+    .screenshot-caption{padding:.9rem .2rem .1rem;}
+    .screenshot-caption h3{margin:.2rem 0 .4rem;}
+    .screenshot-caption p{margin:0; color:var(--muted);}
+    .mini-flow{display:grid; grid-template-columns:repeat(6,1fr); gap:.65rem; margin-top:1rem;}
+    .mini-flow div{background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:.8rem; text-align:center; color:var(--muted); font-size:.9rem;}
+
+    footer{padding:1.5rem 0 3rem; color:var(--muted); font-size:.95rem;}
+    .footer-inner{display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:1.2rem;}
+
+    @media (max-width:900px){.hero-grid,.grid-3,.grid-2,.screenshot-grid,.toc{grid-template-columns:1fr}.section-head{align-items:start; flex-direction:column}.mini-flow{grid-template-columns:1fr 1fr}.nav-inner{align-items:flex-start; flex-direction:column}}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">L</span>
+        <span>LevelUpSecurityLabs</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html#labs">Labs</a>
+        <a href="index.html#posts">Posts</a>
+        <a href="index.html#featured">Featured</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">Microsoft 365 Lab • AitM Concept • EWS Mailbox Access</div>
+        <h1>EWS Phishing Lab Phase 1</h1>
+        <p>
+          Simulating AitM Credential Theft and Mailbox Access in a controlled Microsoft 365 lab.
+          This walkthrough focuses on what happens after access is obtained: mailbox interaction, API-style access patterns, and the defender mindset needed for Phase 2 detection.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#walkthrough">Start the walkthrough</a>
+          <a class="btn btn-secondary" href="#screenshots">View lab visuals</a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="terminal">
+          <div class="terminal-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="terminal-body">
+            <div class="terminal-line"><span class="prompt">$</span> initialize-lab --scenario aitm-ews</div>
+            <div class="terminal-line"><span class="note">[info]</span> Creating controlled mailbox simulation...</div>
+            <div class="terminal-line"><span class="note">[info]</span> Modeling post-compromise access context...</div>
+            <div class="terminal-line"><span class="good">[ok]</span> Mailbox interaction workflow ready.</div>
+            <div class="terminal-line"><span class="prompt">$</span> build-defense-notes --phase 2</div>
+            <div class="terminal-line"><span class="good">[ok]</span> Detection path prepared.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="article">
+    <div class="container">
+
+      <section class="article-card">
+        <h2>Lab Safety Boundary</h2>
+        <p>
+          This lab does not deploy a phishing proxy, collect real credentials, capture live tokens, or target any real user. The AitM portion is modeled as a scenario condition so the lab can focus on defensive understanding of post-compromise mailbox behavior.
+        </p>
+        <div class="highlight">
+          The goal is to understand the risk: after a successful phishing event, mailbox access can become automated, quiet, and difficult to recognize without the right logging and detection strategy.
+        </div>
+      </section>
+
+      <section class="article-card">
+        <h2>What You’ll Build</h2>
+        <div class="toc">
+          <a href="#flow">AitM to mailbox access flow</a>
+          <a href="#walkthrough">Step-by-step lab walkthrough</a>
+          <a href="#screenshots">Sanitized lab screenshots</a>
+          <a href="#takeaways">Defender takeaways</a>
+        </div>
+      </section>
+
+      <section class="article-card" id="flow">
+        <h2>Visual Attack Flow</h2>
+        <p>
+          The lab models a common business email compromise path: the user is lured into an AitM authentication flow, access is established, and mailbox data is queried through an API-style workflow.
+        </p>
+        <div class="diagram-card">
+          <img src="images/ews-attack-flow.png" alt="AitM phishing to EWS mailbox access attack flow diagram">
+        </div>
+        <div class="mini-flow">
+          <div>Phishing Email</div>
+          <div>AitM Relay</div>
+          <div>MFA Completed</div>
+          <div>Session Access</div>
+          <div>Mailbox Access</div>
+          <div>EWS Interaction</div>
+        </div>
+      </section>
+
+      <section class="article-card" id="walkthrough">
+        <h2>Step-by-Step Lab Walkthrough</h2>
+        <div class="step-list">
+          <div class="step">
+            <strong><span class="step-number">1</span>Create a controlled Microsoft 365 lab mailbox</strong>
+            <p>
+              Use a dedicated lab tenant and synthetic users only. Populate the victim mailbox with harmless sample messages such as fake invoices, project updates, and test MFA notifications.
+            </p>
+          </div>
+
+          <div class="step">
+            <strong><span class="step-number">2</span>Define the simulated AitM compromise condition</strong>
+            <p>
+              The lab begins after the user has interacted with a phishing lure and a valid access context exists. This keeps the scenario realistic without building credential-theft infrastructure.
+            </p>
+          </div>
+
+          <div class="step">
+            <strong><span class="step-number">3</span>Model mailbox access through EWS-style interaction</strong>
+            <p>
+              Exchange Web Services historically allowed applications to interact with mailbox data programmatically. In Exchange Online, Basic authentication is no longer supported for EWS, and OAuth-based access is required for supported EWS application workflows.
+            </p>
+            <pre>// Safe lab pseudocode
+connect_to_lab_mailbox(access_context)
+select_folder("Inbox")
+retrieve_message_subjects(limit=10)
+review_results_for_sensitive_themes()</pre>
+          </div>
+
+          <div class="step">
+            <strong><span class="step-number">4</span>Review what an attacker would look for</strong>
+            <p>
+              Focus on attacker objectives rather than credential theft mechanics. Common mailbox targets include financial language, vendor threads, password resets, MFA notifications, invoices, attachments, and executive communication patterns.
+            </p>
+          </div>
+
+          <div class="step">
+            <strong><span class="step-number">5</span>Document defender observations for Phase 2</strong>
+            <p>
+              Capture what should become detection logic later: unusual mailbox access patterns, API-driven activity, impossible travel, unusual user agents, new inbox rules, and mailbox access following suspicious authentication.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="article-card" id="screenshots">
+        <h2>Lab Screenshots</h2>
+        <p>
+          The following sanitized visuals show the safe lab flow without exposing personal, production, or tenant-specific information.
+        </p>
+
+        <div class="screenshot-grid">
+          <div class="screenshot-card">
+            <img src="images/ews-screenshot-1-mailbox.png" alt="Sanitized lab mailbox populated with synthetic messages">
+            <div class="screenshot-caption">
+              <h3>Step 1: Controlled lab mailbox</h3>
+              <p>The mailbox contains synthetic messages only, giving the lab realistic content without using real user data.</p>
+            </div>
+          </div>
+
+          <div class="screenshot-card">
+            <img src="images/ews-screenshot-2-aitm-boundary.png" alt="Sanitized AitM scenario boundary screen">
+            <div class="screenshot-caption">
+              <h3>Step 2: AitM scenario boundary</h3>
+              <p>The AitM portion is represented as a simulated compromise condition so the lab stays defensive and controlled.</p>
+            </div>
+          </div>
+
+          <div class="screenshot-card">
+            <img src="images/ews-screenshot-3-terminal.png" alt="Sanitized terminal output showing simulated mailbox retrieval">
+            <div class="screenshot-caption">
+              <h3>Step 3: Programmatic mailbox access</h3>
+              <p>The simulated API workflow retrieves message subjects from the lab mailbox without using Outlook or a browser session.</p>
+            </div>
+          </div>
+
+          <div class="screenshot-card">
+            <img src="images/ews-screenshot-4-review.png" alt="Sanitized mailbox data review screen">
+            <div class="screenshot-caption">
+              <h3>Step 4: Mailbox data review</h3>
+              <p>Retrieved mailbox data is reviewed from the attacker’s perspective to understand what defenders should detect.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="article-card">
+        <h2>Why This Matters</h2>
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag">Identity</span>
+            <h3>MFA is not the finish line</h3>
+            <p>AitM attacks can target session access, which means defenders need visibility beyond password-based compromise.</p>
+          </article>
+          <article class="card">
+            <span class="tag">Mailbox</span>
+            <h3>Mailboxes are high-value targets</h3>
+            <p>Email contains business context, financial conversations, reset links, attachments, and trust relationships.</p>
+          </article>
+          <article class="card">
+            <span class="tag">Detection</span>
+            <h3>API access changes the signal</h3>
+            <p>Mailbox access may not look like a normal user browsing Outlook, making audit and behavioral analysis critical.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="article-card" id="takeaways">
+        <h2>Defender Takeaways</h2>
+        <ul>
+          <li>Model the post-compromise behavior, not just the phishing email.</li>
+          <li>Track mailbox access patterns after suspicious authentication activity.</li>
+          <li>Pay attention to inbox rule changes, message reads, keyword searches, and attachment access.</li>
+          <li>Use this Phase 1 lab as the foundation for Phase 2 detection engineering.</li>
+        </ul>
+        <div class="warning">
+          Exchange Online EWS is on a retirement path, but the defender lesson remains important: attackers abuse authorized access paths, APIs, sessions, and mailbox permissions to quietly extract value after phishing.
+        </div>
+      </section>
+
+      <section class="article-card">
+        <h2>Next Phase</h2>
+        <p>
+          Phase 2 will focus on detection: audit logs, mailbox access telemetry, suspicious sign-ins, inbox rule creation, and KQL logic that helps identify post-phishing mailbox abuse.
+        </p>
+        <div class="highlight">
+          Build. Break. Defend. Repeat.
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© 2026 LevelUpSecurityLabs</div>
+      <div>Built for hands-on learners in cloud security, detection, and DFIR.</div>
+    </div>
+  </footer>
+</body>
+</html>
