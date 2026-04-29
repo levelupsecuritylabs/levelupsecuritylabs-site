@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impossible Travel Deep Dive | LevelUpSecurityLabs</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a30;
+      --panel-2:#0f1730;
+      --text:#e8eefc;
+      --muted:#9fb0d8;
+      --accent:#5eead4;
+      --accent-2:#60a5fa;
+      --warn:#f59e0b;
+      --bad:#fb7185;
+      --good:#9ef0bc;
+      --border:rgba(255,255,255,0.08);
+      --shadow:0 20px 45px rgba(0,0,0,0.35);
+      --radius:18px;
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(94,234,212,0.16), transparent 22%),
+        linear-gradient(180deg, #09101f 0%, #0b1020 100%);
+      line-height:1.6;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img, svg{max-width:100%}
+
+    .container{
+      width:min(calc(100% - 2rem), var(--max));
+      margin:0 auto;
+    }
+
+    .nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(12px);
+      background:rgba(11,16,32,0.72);
+      border-bottom:1px solid var(--border);
+    }
+
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 0;
+      gap:1rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, var(--accent-2), var(--accent));
+      color:#08101c;
+      font-weight:900;
+      box-shadow:var(--shadow);
+    }
+
+    .nav-links{
+      display:flex;
+      gap:1.1rem;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:.96rem;
+    }
+
+    .nav-links a:hover{color:var(--text)}
+
+    .hero{
+      padding:5.5rem 0 3.5rem;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:2rem;
+      align-items:center;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      color:var(--accent);
+      background:rgba(94,234,212,0.08);
+      border:1px solid rgba(94,234,212,0.18);
+      padding:.45rem .75rem;
+      border-radius:999px;
+      font-size:.88rem;
+      margin-bottom:1rem;
+    }
+
+    h1{
+      font-size:clamp(2.3rem, 4vw, 4.6rem);
+      line-height:1.05;
+      margin:.2rem 0 1rem;
+      letter-spacing:-.03em;
+    }
+
+    h2{
+      font-size:1.8rem;
+      margin:0 0 .7rem;
+      letter-spacing:-.02em;
+    }
+
+    h3{margin:.2rem 0 .45rem;font-size:1.15rem}
+
+    p{color:var(--muted)}
+
+    .hero p{
+      color:var(--muted);
+      font-size:1.08rem;
+      max-width:64ch;
+      margin:0 0 1.6rem;
+    }
+
+    .cta-row{display:flex;gap:.9rem;flex-wrap:wrap;margin-bottom:1.4rem}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.92rem 1.15rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      font-weight:700;
+      transition:.2s ease;
+    }
+    .btn-primary{background:linear-gradient(135deg, var(--accent-2), var(--accent));color:#08101c;border:none;box-shadow:var(--shadow)}
+    .btn-secondary{background:rgba(255,255,255,0.02);color:var(--text)}
+    .btn:hover{transform:translateY(-1px)}
+
+    .hero-card,.card{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.2rem;
+      box-shadow:var(--shadow);
+    }
+
+    .terminal{background:#07101b;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07)}
+    .terminal-top{display:flex;gap:.4rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);background:#091522}
+    .dot{width:10px;height:10px;border-radius:999px;background:#29425f}
+    .terminal-body{padding:1rem 1rem 1.15rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92rem;color:#c8ddff}
+    .terminal-line{margin:.45rem 0}.prompt{color:var(--accent)}.good{color:var(--good)}.note{color:#7fb8ff}.danger{color:var(--bad)}.warn{color:var(--warn)}
+
+    section{padding:1rem 0 4rem}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.2rem}
+    .section-head p{margin:0;color:var(--muted);max-width:70ch}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      padding:.3rem .6rem;
+      border-radius:999px;
+      border:1px solid rgba(96,165,250,0.25);
+      color:#b8d6ff;
+      background:rgba(96,165,250,0.07);
+      margin-bottom:.7rem;
+    }
+
+    .tag.bad{border-color:rgba(251,113,133,.28);color:#fecdd3;background:rgba(251,113,133,.08)}
+    .tag.good{border-color:rgba(94,234,212,.28);color:#ccfbf1;background:rgba(94,234,212,.08)}
+    .tag.warn{border-color:rgba(245,158,11,.28);color:#fde68a;background:rgba(245,158,11,.08)}
+
+    .callout{
+      border:1px solid var(--border);
+      border-left:4px solid var(--accent);
+      background:rgba(255,255,255,.025);
+      border-radius:14px;
+      padding:1rem;
+      margin:1rem 0;
+    }
+    .callout.bad{border-left-color:var(--bad)}
+    .callout.warn{border-left-color:var(--warn)}
+    .callout.good{border-left-color:var(--accent)}
+
+    .code{
+      background:#07101b;
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px;
+      padding:1rem;
+      overflow-x:auto;
+      color:#dbeafe;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.92rem;
+      white-space:pre;
+    }
+
+    .diagram-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1rem;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .diagram-title{font-weight:800;margin:.2rem 0 .8rem;color:var(--text)}
+    .muted{color:var(--muted)}
+    ul,ol{color:var(--muted);padding-left:1.25rem}
+    li{margin:.35rem 0}
+    strong{color:var(--text)}
+
+    .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:16px}
+    table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.02)}
+    th,td{padding:.9rem;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    th{color:var(--text);background:rgba(96,165,250,.07)}
+    td{color:var(--muted)}
+    tr:last-child td{border-bottom:none}
+
+    footer{padding:1.5rem 0 3rem;color:var(--muted);font-size:.95rem}
+    .footer-inner{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:1.2rem}
+
+    @media (max-width: 900px){
+      .hero-grid,.grid-2,.grid-3{grid-template-columns:1fr}
+      .section-head{align-items:start; flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">L</span>
+        <span>LevelUpSecurityLabs</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html#labs">Labs</a>
+        <a href="index.html#posts">Posts</a>
+        <a href="index.html#featured">Featured</a>
+        <a href="index.html#about">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">Detection Engineering • Identity Security • Microsoft 365</div>
+        <h1>Impossible Travel Deep Dive</h1>
+        <p>
+          Impossible travel alerts are useful, noisy, and often misunderstood. This guide breaks down how the signal works,
+          why it creates false positives, what real compromise looks like, and how to investigate it using Microsoft identity
+          and mailbox telemetry.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#workflow">Start the workflow</a>
+          <a class="btn btn-secondary" href="#kql">Jump to KQL</a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="terminal">
+          <div class="terminal-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="terminal-body">
+            <div class="terminal-line"><span class="prompt">$</span> investigate-alert --type impossible-travel</div>
+            <div class="terminal-line"><span class="note">[info]</span> User: analyst@labtenant.com</div>
+            <div class="terminal-line"><span class="warn">[signal]</span> Los Angeles → Frankfurt in 22 minutes</div>
+            <div class="terminal-line"><span class="note">[pivot]</span> Device, MFA, token, inbox rules, mailbox access</div>
+            <div class="terminal-line"><span class="danger">[decision]</span> Treat as suspicious until correlated</div>
+            <div class="terminal-line"><span class="good">[next]</span> Revoke sessions if compromise indicators appear</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>What impossible travel means</h2>
+            <p>
+              Impossible travel occurs when sign-ins for the same account appear from geographically distant locations within
+              a timeframe that should not be physically possible. It is a starting point, not a verdict.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <article class="card">
+            <span class="tag good">Useful signal</span>
+            <h3>Why defenders care</h3>
+            <p>
+              The alert can expose stolen passwords, session token theft, AiTM phishing, malicious proxy use, or unauthorized
+              access from attacker infrastructure.
+            </p>
+          </article>
+          <article class="card">
+            <span class="tag warn">High noise</span>
+            <h3>Why defenders get burned</h3>
+            <p>
+              VPNs, mobile carrier routing, cloud proxies, travel, stale geo-IP data, and corporate egress points can all create
+              high-volume false positives.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="diagram-card">
+          <div class="diagram-title">Diagram 1 — Impossible travel detection logic</div>
+          <svg viewBox="0 0 1100 420" role="img" aria-label="Impossible travel detection flow diagram">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#60a5fa" stop-opacity="0.95"/>
+                <stop offset="1" stop-color="#5eead4" stop-opacity="0.95"/>
+              </linearGradient>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+              </filter>
+              <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#5eead4"/>
+              </marker>
+            </defs>
+            <rect width="1100" height="420" rx="24" fill="#07101b"/>
+            <circle cx="150" cy="90" r="120" fill="#60a5fa" opacity="0.08"/>
+            <circle cx="940" cy="330" r="150" fill="#5eead4" opacity="0.07"/>
+
+            <g filter="url(#shadow)">
+              <rect x="55" y="105" width="180" height="105" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="145" y="142" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="700">Sign-in A</text>
+              <text x="145" y="172" text-anchor="middle" fill="#9fb0d8" font-size="15">Los Angeles</text>
+              <text x="145" y="195" text-anchor="middle" fill="#5eead4" font-size="14">08:00 AM</text>
+
+              <rect x="315" y="105" width="180" height="105" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="405" y="142" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="700">Sign-in B</text>
+              <text x="405" y="172" text-anchor="middle" fill="#9fb0d8" font-size="15">Frankfurt</text>
+              <text x="405" y="195" text-anchor="middle" fill="#5eead4" font-size="14">08:22 AM</text>
+
+              <rect x="575" y="105" width="190" height="105" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="670" y="142" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="700">Compare</text>
+              <text x="670" y="172" text-anchor="middle" fill="#9fb0d8" font-size="15">Distance + time</text>
+              <text x="670" y="195" text-anchor="middle" fill="#f59e0b" font-size="14">speed threshold</text>
+
+              <rect x="850" y="105" width="195" height="105" rx="18" fill="#121a30" stroke="rgba(251,113,133,.35)"/>
+              <text x="947" y="142" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="700">Alert</text>
+              <text x="947" y="172" text-anchor="middle" fill="#9fb0d8" font-size="15">Impossible travel</text>
+              <text x="947" y="195" text-anchor="middle" fill="#fb7185" font-size="14">needs correlation</text>
+            </g>
+
+            <line x1="240" y1="157" x2="305" y2="157" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow)"/>
+            <line x1="500" y1="157" x2="565" y2="157" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow)"/>
+            <line x1="770" y1="157" x2="840" y2="157" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow)"/>
+
+            <path d="M145 260 C250 330, 370 330, 405 260" fill="none" stroke="#60a5fa" stroke-width="3" stroke-dasharray="8 8"/>
+            <text x="275" y="333" text-anchor="middle" fill="#9fb0d8" font-size="15">Same user, different geography, unrealistic travel time</text>
+
+            <rect x="325" y="285" width="450" height="70" rx="18" fill="rgba(96,165,250,.08)" stroke="rgba(96,165,250,.22)"/>
+            <text x="550" y="315" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="700">Important</text>
+            <text x="550" y="340" text-anchor="middle" fill="#9fb0d8" font-size="15">The alert tells you where to look — not whether the account is compromised.</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>What bad looks like</h2>
+            <p>Real compromises usually include more than one signal. The goal is to correlate impossible travel with identity, device, mailbox, and user behavior.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag bad">AiTM / token theft</span>
+            <h3>Session reuse without a password failure</h3>
+            <p>Legitimate login appears first. Minutes later, an attacker reuses a stolen session from another country without obvious password guessing.</p>
+          </article>
+          <article class="card">
+            <span class="tag bad">Mailbox compromise</span>
+            <h3>Inbox rule after suspicious sign-in</h3>
+            <p>Impossible travel is followed by a new forwarding rule, delete rule, or rule that hides messages from finance, payroll, or executives.</p>
+          </article>
+          <article class="card">
+            <span class="tag bad">Abnormal access</span>
+            <h3>MailItemsAccessed spike</h3>
+            <p>The user has a burst of mailbox activity shortly after the risky sign-in, especially from a new IP, device, app, or country.</p>
+          </article>
+        </div>
+
+        <div class="callout warn">
+          <strong>High-volume impossible travel does not always mean high-volume compromise.</strong>
+          A wave of alerts can be caused by VPN changes, mobile IP rotation, or bad geo-IP mapping. Treat volume as a triage signal, then pivot into stronger evidence.
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="container">
+        <div class="diagram-card">
+          <div class="diagram-title">Diagram 2 — Investigation workflow</div>
+          <svg viewBox="0 0 1100 520" role="img" aria-label="Impossible travel investigation workflow diagram">
+            <defs>
+              <linearGradient id="g2" x1="0" x2="1">
+                <stop offset="0" stop-color="#60a5fa"/>
+                <stop offset="1" stop-color="#5eead4"/>
+              </linearGradient>
+              <marker id="arrow2" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#60a5fa"/>
+              </marker>
+            </defs>
+            <rect width="1100" height="520" rx="24" fill="#07101b"/>
+            <circle cx="950" cy="95" r="130" fill="#5eead4" opacity="0.08"/>
+            <circle cx="140" cy="430" r="155" fill="#60a5fa" opacity="0.08"/>
+
+            <g font-family="Inter, Segoe UI, Arial">
+              <rect x="60" y="70" width="180" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="150" y="107" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">1. Alert</text>
+              <text x="150" y="132" text-anchor="middle" fill="#9fb0d8" font-size="14">Impossible travel</text>
+
+              <rect x="310" y="70" width="180" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="400" y="107" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">2. Validate</text>
+              <text x="400" y="132" text-anchor="middle" fill="#9fb0d8" font-size="14">VPN, proxy, geo-IP</text>
+
+              <rect x="560" y="70" width="180" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="650" y="107" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">3. Identity</text>
+              <text x="650" y="132" text-anchor="middle" fill="#9fb0d8" font-size="14">MFA, CA, token</text>
+
+              <rect x="810" y="70" width="210" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="915" y="107" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">4. Device/App</text>
+              <text x="915" y="132" text-anchor="middle" fill="#9fb0d8" font-size="14">Browser, OS, client app</text>
+
+              <rect x="185" y="270" width="210" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="290" y="307" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">5. Mailbox</text>
+              <text x="290" y="332" text-anchor="middle" fill="#9fb0d8" font-size="14">Rules, access, send volume</text>
+
+              <rect x="455" y="270" width="210" height="90" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+              <text x="560" y="307" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">6. Decide</text>
+              <text x="560" y="332" text-anchor="middle" fill="#9fb0d8" font-size="14">Noise or compromise?</text>
+
+              <rect x="725" y="270" width="210" height="90" rx="18" fill="#121a30" stroke="rgba(251,113,133,.38)"/>
+              <text x="830" y="307" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">7. Respond</text>
+              <text x="830" y="332" text-anchor="middle" fill="#fb7185" font-size="14">Revoke, reset, remediate</text>
+            </g>
+
+            <line x1="245" y1="115" x2="300" y2="115" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+            <line x1="495" y1="115" x2="550" y2="115" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+            <line x1="745" y1="115" x2="800" y2="115" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+            <path d="M915 165 C915 220, 350 220, 290 265" fill="none" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+            <line x1="400" y1="315" x2="445" y2="315" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+            <line x1="670" y1="315" x2="715" y2="315" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrow2)"/>
+
+            <rect x="240" y="410" width="620" height="58" rx="16" fill="rgba(94,234,212,.08)" stroke="rgba(94,234,212,.24)"/>
+            <text x="550" y="445" text-anchor="middle" fill="#ccfbf1" font-size="16" font-weight="700">Best investigations pivot from the alert into stronger evidence: device, MFA, mailbox, and user confirmation.</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Investigation checklist</h2>
+            <p>Use this checklist to separate false positives from real identity compromise.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Question</th><th>Why it matters</th><th>Bad indicator</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Are the IPs known corporate VPN or ZTNA exits?</td><td>VPN egress often causes impossible travel noise.</td><td>Unknown ASN, anonymizer, residential proxy, hosting provider.</td></tr>
+              <tr><td>Was MFA satisfied, bypassed, or not required?</td><td>Authentication strength changes the risk decision.</td><td>MFA satisfied from unfamiliar location with no user recognition.</td></tr>
+              <tr><td>Is the device familiar?</td><td>Known compliant devices lower risk; unknown devices raise risk.</td><td>New browser, new OS, unmanaged device, unfamiliar client app.</td></tr>
+              <tr><td>Were inbox rules created?</td><td>BEC actors commonly hide, forward, or delete messages.</td><td>Rules targeting finance, payroll, invoices, executives, or security alerts.</td></tr>
+              <tr><td>Was there mailbox access or mass sending?</td><td>Post-login behavior often confirms impact.</td><td>MailItemsAccessed spike, SendAs activity, external forwarding, phishing sent internally.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="kql">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>KQL detection blocks</h2>
+            <p>Use these as lab-friendly starting points. Tune names, fields, tables, and thresholds to match your environment and data connector availability.</p>
+          </div>
+        </div>
+
+        <article class="card">
+          <span class="tag">Microsoft Entra ID</span>
+          <h3>Successful sign-ins from multiple countries</h3>
+          <pre class="code">SigninLogs
+| where TimeGenerated > ago(1h)
+| where ResultType == 0
+| extend Country = tostring(LocationDetails.countryOrRegion)
+| summarize Countries = make_set(Country), SignInCount = count(), IPs = make_set(IPAddress) by UserPrincipalName
+| where array_length(Countries) >= 3
+| order by SignInCount desc</pre>
+        </article>
+
+        <article class="card" style="margin-top:1rem;">
+          <span class="tag bad">Higher signal</span>
+          <h3>Impossible travel plus new client app or device detail</h3>
+          <pre class="code">SigninLogs
+| where TimeGenerated > ago(24h)
+| where ResultType == 0
+| extend Country = tostring(LocationDetails.countryOrRegion)
+| extend Browser = tostring(DeviceDetail.browser)
+| extend OS = tostring(DeviceDetail.operatingSystem)
+| summarize Countries = make_set(Country), Browsers = make_set(Browser), OperatingSystems = make_set(OS), IPs = make_set(IPAddress), Count = count() by UserPrincipalName
+| where array_length(Countries) >= 2 and (array_length(Browsers) >= 2 or array_length(OperatingSystems) >= 2)
+| order by Count desc</pre>
+        </article>
+
+        <article class="card" style="margin-top:1rem;">
+          <span class="tag bad">BEC pivot</span>
+          <h3>Suspicious inbox rules after risky sign-in</h3>
+          <pre class="code">let RiskyUsers =
+SigninLogs
+| where TimeGenerated > ago(24h)
+| where ResultType == 0
+| extend Country = tostring(LocationDetails.countryOrRegion)
+| summarize Countries = make_set(Country) by UserPrincipalName
+| where array_length(Countries) >= 2
+| project UserPrincipalName;
+OfficeActivity
+| where TimeGenerated > ago(24h)
+| where Operation in ("New-InboxRule", "Set-InboxRule")
+| where UserId in (RiskyUsers)
+| project TimeGenerated, UserId, Operation, ClientIP, Parameters</pre>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="diagram-card">
+          <div class="diagram-title">Diagram 3 — False positive vs compromise decision tree</div>
+          <svg viewBox="0 0 1100 560" role="img" aria-label="Decision tree for impossible travel false positive versus compromise">
+            <defs>
+              <marker id="arrow3" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#5eead4"/>
+              </marker>
+            </defs>
+            <rect width="1100" height="560" rx="24" fill="#07101b"/>
+            <rect x="415" y="45" width="270" height="72" rx="18" fill="#121a30" stroke="rgba(255,255,255,.12)"/>
+            <text x="550" y="77" text-anchor="middle" fill="#e8eefc" font-size="18" font-weight="800">Impossible Travel Alert</text>
+            <text x="550" y="101" text-anchor="middle" fill="#9fb0d8" font-size="14">Start with correlation</text>
+
+            <rect x="95" y="190" width="255" height="90" rx="18" fill="#121a30" stroke="rgba(94,234,212,.35)"/>
+            <text x="222" y="226" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">Known VPN / proxy?</text>
+            <text x="222" y="251" text-anchor="middle" fill="#9fb0d8" font-size="14">Corporate egress, ZTNA, travel</text>
+
+            <rect x="425" y="190" width="255" height="90" rx="18" fill="#121a30" stroke="rgba(245,158,11,.35)"/>
+            <text x="552" y="226" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">Same device + MFA?</text>
+            <text x="552" y="251" text-anchor="middle" fill="#9fb0d8" font-size="14">Known browser, OS, method</text>
+
+            <rect x="750" y="190" width="255" height="90" rx="18" fill="#121a30" stroke="rgba(251,113,133,.35)"/>
+            <text x="877" y="226" text-anchor="middle" fill="#e8eefc" font-size="17" font-weight="800">Post-login abuse?</text>
+            <text x="877" y="251" text-anchor="middle" fill="#9fb0d8" font-size="14">Rules, access, sending, OAuth</text>
+
+            <rect x="95" y="390" width="255" height="90" rx="18" fill="rgba(94,234,212,.08)" stroke="rgba(94,234,212,.45)"/>
+            <text x="222" y="426" text-anchor="middle" fill="#ccfbf1" font-size="17" font-weight="800">Likely False Positive</text>
+            <text x="222" y="451" text-anchor="middle" fill="#9fb0d8" font-size="14">Document and tune</text>
+
+            <rect x="425" y="390" width="255" height="90" rx="18" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.45)"/>
+            <text x="552" y="426" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="800">Needs More Review</text>
+            <text x="552" y="451" text-anchor="middle" fill="#9fb0d8" font-size="14">Contact user, pull logs</text>
+
+            <rect x="750" y="390" width="255" height="90" rx="18" fill="rgba(251,113,133,.08)" stroke="rgba(251,113,133,.45)"/>
+            <text x="877" y="426" text-anchor="middle" fill="#fecdd3" font-size="17" font-weight="800">Likely Compromise</text>
+            <text x="877" y="451" text-anchor="middle" fill="#9fb0d8" font-size="14">Revoke, reset, contain</text>
+
+            <path d="M550 120 C470 150, 315 160, 222 187" fill="none" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow3)"/>
+            <path d="M550 120 C550 150, 552 160, 552 187" fill="none" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow3)"/>
+            <path d="M550 120 C630 150, 780 160, 877 187" fill="none" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow3)"/>
+
+            <line x1="222" y1="284" x2="222" y2="384" stroke="#5eead4" stroke-width="3" marker-end="url(#arrow3)"/>
+            <line x1="552" y1="284" x2="552" y2="384" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow3)"/>
+            <line x1="877" y1="284" x2="877" y2="384" stroke="#fb7185" stroke-width="3" marker-end="url(#arrow3)"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Response actions</h2>
+            <p>If the correlation points toward compromise, move quickly. Identity incidents spread fast because valid sessions can bypass traditional password-based thinking.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag bad">Contain</span>
+            <h3>Revoke sessions</h3>
+            <p>Invalidate refresh tokens and force re-authentication. This is critical when token theft or AiTM phishing is suspected.</p>
+          </article>
+          <article class="card">
+            <span class="tag bad">Recover</span>
+            <h3>Reset credentials and MFA</h3>
+            <p>Reset the password, review MFA methods, remove unknown authenticators, and require re-registration when needed.</p>
+          </article>
+          <article class="card">
+            <span class="tag bad">Eradicate</span>
+            <h3>Remove mailbox persistence</h3>
+            <p>Delete malicious inbox rules, forwarding, OAuth grants, and suspicious app consent created during the compromise window.</p>
+          </article>
+        </div>
+
+        <div class="callout good">
+          <strong>Key takeaway:</strong> Impossible travel is not the case. It is the doorway into the case. The strongest investigations prove or disprove compromise with correlated behavior.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>© 2026 LevelUpSecurityLabs</div>
+      <div>Build. Break. Defend. Repeat.</div>
+    </div>
+  </footer>
+</body>
+</html>
