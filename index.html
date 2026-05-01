@@ -1,63 +1,684 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>LevelUpSecurityLabs</title>
 <style>
-body{font-family:Arial, sans-serif;background:#0b1020;color:#e8eefc;margin:0}
-.container{width:90%;max-width:1100px;margin:auto}
-.card{background:#121a30;border-radius:12px;padding:16px;margin:10px 0}
-.link{color:#5eead4;font-weight:bold}
-.tag{color:#60a5fa;font-size:12px}
-h1,h2,h3{margin:10px 0}
-</style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a30;
+      --panel-2:#0f1730;
+      --text:#e8eefc;
+      --muted:#9fb0d8;
+      --accent:#5eead4;
+      --accent-2:#60a5fa;
+      --border:rgba(255,255,255,0.08);
+      --shadow:0 20px 45px rgba(0,0,0,0.35);
+      --radius:18px;
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(94,234,212,0.16), transparent 22%),
+        linear-gradient(180deg, #09101f 0%, #0b1020 100%);
+      line-height:1.6;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%}
+
+    .container{
+      width:min(calc(100% - 2rem), var(--max));
+      margin:0 auto;
+    }
+
+    .nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(12px);
+      background:rgba(11,16,32,0.72);
+      border-bottom:1px solid var(--border);
+    }
+
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 0;
+      gap:1rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, var(--accent-2), var(--accent));
+      color:#08101c;
+      font-weight:900;
+      box-shadow:var(--shadow);
+    }
+
+    .nav-links{
+      display:flex;
+      gap:1.1rem;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:.96rem;
+    }
+
+    .nav-links a:hover{color:var(--text)}
+
+    .hero{
+      padding:5.5rem 0 3.5rem;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:2rem;
+      align-items:center;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      color:var(--accent);
+      background:rgba(94,234,212,0.08);
+      border:1px solid rgba(94,234,212,0.18);
+      padding:.45rem .75rem;
+      border-radius:999px;
+      font-size:.88rem;
+      margin-bottom:1rem;
+    }
+
+    h1{
+      font-size:clamp(2.3rem, 4vw, 4.6rem);
+      line-height:1.05;
+      margin:.2rem 0 1rem;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      color:var(--muted);
+      font-size:1.08rem;
+      max-width:62ch;
+      margin:0 0 1.6rem;
+    }
+
+    .cta-row{
+      display:flex;
+      gap:.9rem;
+      flex-wrap:wrap;
+      margin-bottom:1.4rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.92rem 1.15rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent-2), var(--accent));
+      color:#08101c;
+      border:none;
+      box-shadow:var(--shadow);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,0.02);
+      color:var(--text);
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+
+    .hero-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.1rem;
+      box-shadow:var(--shadow);
+    }
+
+    .terminal{
+      background:#07101b;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.07);
+    }
+
+    .terminal-top{
+      display:flex;
+      gap:.4rem;
+      padding:.8rem 1rem;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      background:#091522;
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:999px;background:#29425f;
+    }
+
+    .terminal-body{
+      padding:1rem 1rem 1.15rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:.94rem;
+      color:#c8ddff;
+    }
+
+    .terminal-line{margin:.45rem 0}
+    .prompt{color:var(--accent)}
+    .good{color:#9ef0bc}
+    .note{color:#7fb8ff}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1rem;
+      margin-top:1.2rem;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.025);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:1rem;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:1.3rem;
+      margin-bottom:.15rem;
+    }
+
+    section{
+      padding:1rem 0 4rem;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1.2rem;
+    }
+
+    .section-head h2{
+      font-size:1.7rem;
+      margin:0;
+      letter-spacing:-.02em;
+    }
+
+    .section-head p{
+      margin:0;
+      color:var(--muted);
+      max-width:60ch;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1rem;
+    }
+
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.2rem;
+      box-shadow:var(--shadow);
+    }
+
+    .card h3{
+      margin:.2rem 0 .45rem;
+      font-size:1.12rem;
+    }
+
+    .card p{
+      margin:0 0 .85rem;
+      color:var(--muted);
+      font-size:.97rem;
+    }
+
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      padding:.3rem .6rem;
+      border-radius:999px;
+      border:1px solid rgba(96,165,250,0.25);
+      color:#b8d6ff;
+      background:rgba(96,165,250,0.07);
+      margin-bottom:.7rem;
+    }
+
+    .link{
+      color:var(--accent);
+      font-weight:700;
+      font-size:.95rem;
+    }
+
+    .featured{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:1rem;
+    }
+
+    .feature-main{
+      min-height:280px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .feature-main::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(96,165,250,.2), transparent 45%),
+        linear-gradient(180deg, rgba(94,234,212,.08), transparent 55%);
+      pointer-events:none;
+    }
+
+    .feature-list{
+      display:grid;
+      gap:1rem;
+    }
+
+    .newsletter{
+      text-align:center;
+      padding:2rem;
+      background:
+        radial-gradient(circle at top, rgba(94,234,212,.12), transparent 35%),
+        linear-gradient(180deg, #101933, #0d152b);
+    }
+
+    .newsletter p{
+      color:var(--muted);
+      max-width:58ch;
+      margin:.5rem auto 1.2rem;
+    }
+
+    .signup{
+      display:flex;
+      gap:.8rem;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    input[type="email"]{
+      width:min(420px, 100%);
+      padding:.95rem 1rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#091321;
+      color:var(--text);
+      outline:none;
+    }
+
+    footer{
+      padding:1.5rem 0 3rem;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .footer-inner{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      flex-wrap:wrap;
+      border-top:1px solid var(--border);
+      padding-top:1.2rem;
+    }
+
+    @media (max-width: 900px){
+      .hero-grid,
+      .featured,
+      .grid-3{
+        grid-template-columns:1fr;
+      }
+      .stats{grid-template-columns:1fr}
+      .section-head{align-items:start; flex-direction:column}
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-<h1>LevelUpSecurityLabs</h1>
-
-<h2>Featured Content</h2>
-
-<div class="card">
-<span class="tag">Detection • Identity</span>
-<h3>Impossible Travel Deep Dive</h3>
-<p>Investigation workflows, false positives, and token theft detection.</p>
-<a class="link" href="impossible-travel-deep-dive.html">Read →</a>
+<nav class="nav">
+<div class="container nav-inner">
+<a class="brand" href="#">
+<span class="brand-mark">L</span>
+<span>LevelUpSecurityLabs</span>
+</a>
+<div class="nav-links">
+<a href="#labs">Labs</a>
+<a href="#posts">Posts</a>
+<a href="#featured">Featured</a>
+<a href="#about">About</a>
 </div>
-
-<div class="card">
+</div>
+</nav>
+<header class="hero">
+<div class="container hero-grid">
+<div>
+<div class="eyebrow">Hands-on cybersecurity labs • Azure • Detection • DFIR</div>
+<h1>Build real security skills, one lab at a time.</h1>
+<p>
+          LevelUpSecurityLabs is a practical cybersecurity blog focused on step-by-step labs,
+          cloud security walkthroughs, detection engineering, and blue team learning you can
+          actually use on the job.
+        </p>
+<div class="cta-row">
+<a class="btn btn-primary" href="impossible-travel-deep-dive.html">Read the latest post</a>
+<a class="btn btn-secondary" href="#labs">Explore labs</a>
+</div>
+<div class="stats">
+<div class="stat">
+<strong>Cloud Labs</strong>
+<span>Azure, Microsoft security, identity, and data protection walkthroughs.</span>
+</div>
+<div class="stat">
+<strong>Detection Focus</strong>
+<span>KQL, threat hunting, email compromise, and endpoint investigation content.</span>
+</div>
+<div class="stat">
+<strong>Career Growth</strong>
+<span>Designed for engineers building hands-on experience beyond certifications.</span>
+</div>
+</div>
+</div>
+<div class="hero-card">
+<div class="terminal">
+<div class="terminal-top">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+<div class="terminal-body">
+<div class="terminal-line"><span class="prompt">$</span> initialize-lab --platform azure</div>
+<div class="terminal-line"><span class="note">[info]</span> Creating tenant-safe learning environment...</div>
+<div class="terminal-line"><span class="note">[info]</span> Enabling logging, identity, storage, and policy controls...</div>
+<div class="terminal-line"><span class="good">[ok]</span> Lab ready: Purview + Defender + Entra test workflow</div>
+<div class="terminal-line"><span class="prompt">$</span> publish writeup --site levelupsecuritylabs</div>
+<div class="terminal-line"><span class="good">[ok]</span> New post deployed: impossible-travel-deep-dive.html</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<section id="featured">
+<div class="container">
+<div class="section-head">
+<div>
+<h2>Featured content</h2>
+<p>Hands-on labs, detection workflows, and practical security engineering guides.</p>
+</div>
+</div>
+<div class="featured">
+<article class="card feature-main">
+<span class="tag">Featured Detection • Identity</span>
+<h3>Impossible Travel Deep Dive</h3>
+<p>
+              Investigate impossible travel alerts without blindly trusting them. This guide covers false positives,
+              token theft indicators, high-volume impossible travel, KQL detections, and response workflows.
+            </p>
+<a class="link" href="impossible-travel-deep-dive.html">Read featured post →</a>
+<div>
+<hr style="margin:15px 0; opacity:0.2;"/>
+<p><strong>Also explore:</strong></p>
+<ul style="color:var(--muted); padding-left:18px;">
+<li><a class="link" href="impossible-travel-deep-dive.html">Impossible Travel Deep Dive</a></li>
+<li><a class="link" href="ews-phishing-lab-phase1.html">EWS Phishing Lab Phase 1</a></li>
+<li><a class="link" href="kape-targeted-forensic-collection.html">KAPE Forensic Collection Lab</a></li>
+</ul>
+</div></article>
+<div class="feature-list">
+<article class="card">
 <span class="tag">Detection • Email Security</span>
 <h3>What Bad Looks Like: Mailbox Compromise</h3>
-<p>Identify compromised accounts using real-world signals.</p>
-<a class="link" href="what-bad-looks-like-mailbox-compromise.html">Read →</a>
+<p>Recognize suspicious mailbox activity, attacker behavior, and Microsoft 365 signals that help identify compromised accounts faster.</p>
+<a class="link" href="what-bad-looks-like-mailbox-compromise.html">Open guide →</a>
+</article>
+<article class="card">
+<span class="tag">Email Security • Identity</span>
+<h3>EWS Phishing Lab Phase 1</h3>
+<p>Simulate AitM credential theft and mailbox access in a safe lab while learning how EWS-style mailbox interaction fits into BEC investigations.</p>
+<a class="link" href="ews-phishing-lab-phase1.html">Open lab →</a>
+</article>
+<article class="card">
+<span class="tag">DFIR</span>
+<h3>Using KAPE for targeted forensic collection in a lab</h3>
+<p>Learn where KAPE fits, what artifacts to grab first, and how to keep collections focused and useful.</p>
+<a class="link" href="kape-targeted-forensic-collection.html">Open lab →</a>
+</article>
+<article class="card">
+<span class="tag">Cloud • Identity</span>
+<h3>What To Do When Your Entra ID Trial Expires</h3>
+<p>Learn what breaks, what still works, and how to continue building your Microsoft security lab without wasting money.</p>
+<a class="link" href="entra-trial-expiry-guide.html">View guide →</a>
+</article>
+<article class="card">
+<span class="tag">Starter Guide</span>
+<h3>What account should you use for Azure security labs?</h3>
+<p>A beginner-friendly breakdown of subscriptions, free tiers, and how to avoid unnecessary costs.</p>
+<a class="link" href="azure-lab-accounts.html">View guide →</a>
+</article>
 </div>
-
-<div class="card">
-<span class="tag">Detection • Incident Response</span>
-<h3>Phishing Remediation Actions Deep Dive</h3>
-<p>Session revocation, password reset, MFA reset, and response workflows.</p>
-<a class="link" href="phishing-remediation-actions.html">Read →</a>
 </div>
-
-<h2>Recent Posts</h2>
-
-<div class="card">
-<span class="tag">Detection • Incident Response</span>
-<h3>Phishing Remediation Actions Deep Dive</h3>
-<p>Detection mapping, attacker behavior, and containment actions.</p>
-<a class="link" href="phishing-remediation-actions.html">Read →</a>
 </div>
-
-<div class="card">
+</section>
+<section id="labs">
+<div class="container">
+<div class="section-head">
+<div>
+<h2>Lab categories</h2>
+</div>
+</div>
+<div class="grid-3">
+<article class="card">
+<span class="tag">Azure</span>
+<h3>Cloud Security Labs</h3>
+<p>Build environments that teach identity, logging, storage, security controls, and architecture fundamentals.</p>
+<a class="link" href="cloud-category.html">Browse category →</a>
+</article>
+<article class="card">
+<span class="tag">Blue Team</span>
+<h3>Detection &amp; Threat Hunting</h3>
+<p>Step-by-step exercises on investigations, attack patterns, hunting techniques, and useful KQL workflows.</p>
+<a class="link" href="detection-threat-hunting.html">Browse category →</a>
+</article>
+<article class="card">
+<span class="tag">Career</span>
+<h3>Certification to Real-World Skills</h3>
+<p>Bridge the gap between passing exams and building practical experience that improves performance at work.</p>
+<a class="link" href="certification-real-world-skills.html">Browse category →</a>
+</article>
+</div>
+</div>
+</section>
+<section id="posts">
+<div class="container">
+<div class="section-head">
+<div>
+<h2>Recent posts</h2>
+<p style="color:var(--muted); margin-top:4px;">
+              Real labs. Real detections. Real-world skills.
+            </p>
+</div>
+</div>
+<div class="grid-3">
+<article class="card">
+<span class="tag">Detection • Identity</span>
+<h3>Impossible Travel Deep Dive</h3>
+<p>
+              A practical investigation guide for impossible travel alerts, false positives,
+              high-volume detections, token theft indicators, and response workflows.
+            </p>
+<a class="link" href="impossible-travel-deep-dive.html">Read post →</a>
+</article>
+<article class="card">
+<span class="tag">Detection • Email Security</span>
+<h3>What Bad Looks Like: Mailbox Compromise</h3>
+<p>
+              A practical breakdown of suspicious mailbox activity, attacker behavior,
+              and how to identify compromised accounts using real detection signals.
+            </p>
+<a class="link" href="what-bad-looks-like-mailbox-compromise.html">Read post →</a>
+</article>
+<article class="card">
+<span class="tag">Email Security • Identity</span>
+<h3>EWS Phishing Lab Phase 1</h3>
+<p>
+              Simulate AitM credential theft and mailbox access in a safe lab while learning how EWS-style mailbox interaction fits into BEC investigations.
+            </p>
+<a class="link" href="ews-phishing-lab-phase1.html">Read post →</a>
+</article>
+<article class="card">
+<span class="tag">Cloud • Identity</span>
+<h3>What To Do When Your Entra ID Trial Expires</h3>
+<p>
+              Your free 30-day Entra ID trial expired—now what? Learn what breaks,
+              what still works, and how to continue building your lab without wasting money.
+            </p>
+<a class="link" href="entra-trial-expiry-guide.html">Read post →</a>
+</article>
+<article class="card">
 <span class="tag">DFIR</span>
 <h3>Using KAPE for Targeted Forensic Collection</h3>
-<p>Focused artifact collection and investigation workflows.</p>
-<a class="link" href="kape-targeted-forensic-collection.html">Read →</a>
+<p>
+              Learn how to collect high-value forensic artifacts quickly using KAPE, focus on what matters,
+              and build better investigations.
+            </p>
+<a class="link" href="kape-targeted-forensic-collection.html">Read post →</a>
+</article>
+<article class="card">
+<span class="tag">Web / DNS</span>
+<h3>From GitHub Pages to Custom Domain: A Record vs CNAME</h3>
+<p>
+              How I connected a free GitHub Pages site to my domain and what I learned
+              about A records, CNAME records, and real-world DNS behavior.
+            </p>
+<a class="link" href="dns1.html">Read post →</a>
+</article>
+<article class="card">
+<span class="tag">Detection Engineering</span>
+<h3>Mailbox Compromise Detection: Real-World Signals</h3>
+<p>Continue the series with deeper KQL detection logic and advanced hunting workflows.</p>
+<a class="link" href="what-bad-looks-like-mailbox-compromise.html">Start here →</a>
+</article>
 </div>
-
 </div>
-
+</section>
+<section id="mission-banner">
+<div class="container">
+<div class="card" style="text-align:center; padding:2.2rem; position:relative; overflow:hidden;">
+<div style="
+            position:absolute;
+            inset:0;
+            background:
+              radial-gradient(circle at center, rgba(94,234,212,0.12), transparent 60%),
+              linear-gradient(135deg, rgba(96,165,250,0.12), transparent 50%);
+            pointer-events:none;
+          "></div>
+<h2 style="
+            font-size:clamp(1.8rem, 3vw, 2.8rem);
+            margin-bottom:0.6rem;
+            letter-spacing:-0.02em;
+          ">
+            Build. Break. Defend. Repeat.
+          </h2>
+<p style="
+            color:var(--muted);
+            max-width:60ch;
+            margin:0 auto;
+            font-size:1.05rem;
+          ">
+            Real cybersecurity skill comes from doing the work — building labs, testing detections,
+            breaking systems, and understanding how to defend them in real environments.
+          </p>
+</div>
+</div>
+</section>
+<section id="about">
+<div class="container">
+<div class="section-head">
+<div>
+<h2>About LevelUpSecurityLabs</h2>
+<p>
+              A hands-on cybersecurity learning platform focused on building real-world skills through practical labs—not just theory.
+            </p>
+</div>
+</div>
+<div class="grid-3">
+<article class="card">
+<h3>Hands-On Labs</h3>
+<p>
+              Build real environments, test detections, and analyze threats using workflows that reflect real enterprise security operations.
+            </p>
+</article>
+<article class="card">
+<h3>Real-World Focus</h3>
+<p>
+              Learn threat hunting, incident response, and cloud security with techniques that translate directly to the job.
+            </p>
+</article>
+<article class="card">
+<h3>Practical Skill Growth</h3>
+<p>
+              Move beyond certifications and develop hands-on experience that actually works in production environments.
+            </p>
+</article>
+</div>
+<div style="margin-top:1.5rem;">
+<a class="btn btn-primary" href="about.html">Learn more about the site →</a>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="card newsletter">
+<h2>Follow the build</h2>
+<p>
+            Follow along as new labs, detection workflows, and cloud security walkthroughs are released.
+          </p>
+<div class="signup">
+<input placeholder="Your email address" type="email"/>
+<a class="btn btn-primary" href="#">Subscribe</a>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer>
+<div class="container footer-inner">
+<div>© 2026 LevelUpSecurityLabs</div>
+<div>Built for hands-on learners in cloud security, detection, and DFIR.</div>
+</div>
+</footer>
 </body>
 </html>
